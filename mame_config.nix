@@ -35,14 +35,14 @@ let pubkeys = import ./pubkeys.nix; in
   # Per-interface useDHCP will be mandatory in the future, so this generated config
   # replicates the default behaviour.
   networking.useDHCP = false;
-  networking.interfaces.enp0s25.useDHCP = true;
+  networking.interfaces.eno1.useDHCP = true;
   # Disable IPv6 privacy protection because this is a server and we want a static-ish address
-  networking.interfaces.enp0s25.tempAddress = "disabled";
+  networking.interfaces.eno1.tempAddress = "disabled";
 
   # Enable RA for IPv6 tokens to work
   services.udev.extraRules = "
-    ACTION==\"add\", SUBSYSTEM==\"net\", RUN+=\"${pkgs.procps}/bin/sysctl net.ipv6.conf.enp0s25.accept_ra=1\"
-    ACTION==\"add\", SUBSYSTEM==\"net\", RUN+=\"${pkgs.iproute}/bin/ip token set '::10' dev enp0s25\"
+    ACTION==\"add\", SUBSYSTEM==\"net\", RUN+=\"${pkgs.procps}/bin/sysctl net.ipv6.conf.eno1.accept_ra=1\"
+    ACTION==\"add\", SUBSYSTEM==\"net\", RUN+=\"${pkgs.iproute}/bin/ip token set '::10' dev eno1\"
     ";
 
   # Configure network proxy if necessary
@@ -77,7 +77,7 @@ let pubkeys = import ./pubkeys.nix; in
     isNormalUser = true;
     description = "Pyry Kontio";
     extraGroups = [ "wheel" "networkmanager" ];
-    openssh.authorizedKeys.keys = [ pubkeys.kon_bae ];
+    openssh.authorizedKeys.keys = [ pubkeys.kon_bae pubkeys.kon_nagi_win ];
   };
 
   # List packages installed in system profile. To search, run:

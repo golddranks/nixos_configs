@@ -103,7 +103,7 @@ let pubkeys = import ./pubkeys.nix; in
     isNormalUser = true;
     description = "Pyry Kontio";
     extraGroups = [ "wheel" "networkmanager" ];
-    openssh.authorizedKeys.keys = [ pubkeys.kon_bae ];
+    openssh.authorizedKeys.keys = [ pubkeys.kon_bae pubkeys.kon_nagi_win ];
   };
 
   # List packages installed in system profile. To search, run:
