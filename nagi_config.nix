@@ -13,7 +13,6 @@
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
-  boot.kernelParams = [ "nouveau.noaccel=1" ];
 
   security.sudo.extraConfig = ''
     Defaults        timestamp_timeout=45
@@ -85,45 +84,7 @@
   services.openssh.permitRootLogin = "no";
 
   services.fail2ban.enable = true;
-/*
-  services.samba = {
-    enable = false;
-    securityType = "user";
-    extraConfig = ''
-      workgroup = WORKGROUP
-      server string = nagi
-      netbios name = nagi
-      security = user
-      guest account = nobody
-      map to guest = bad user
-      # These might affect version compatibility?!
-      use sendfile = yes
-      server min protocol = SMB3_00
-    '';
-    shares = {
-      Valtavuus = {
-        path = "/mnt/Valtavuus";
-        browseable = "yes";
-        "read only" = "no";
-        "guest ok" = "yes";
-        "create mask" = "0644";
-        "directory mask" = "0755";
-        "force user" = "samba";
-        "force group" = "users";
-      };
-      Avaruus = {
-        path = "/mnt/Avaruus/@varmuus";
-        browseable = "yes";
-        "read only" = "no";
-        "guest ok" = "yes";
-        "create mask" = "0644";
-        "directory mask" = "0755";
-        "force user" = "samba";
-        "force group" = "users";
-      };
-    };
-  };
-  */
+
   # Publish this server and its address on the network
   services.avahi = {
     enable = true;
@@ -135,17 +96,6 @@
     extraServiceFiles = {
       ssh = "${pkgs.avahi}/etc/avahi/services/ssh.service";
       sftp = "${pkgs.avahi}/etc/avahi/services/sftp-ssh.service";
-      smb = ''
-        <?xml version="1.0" standalone='no'?><!--*-nxml-*-->
-        <!DOCTYPE service-group SYSTEM "avahi-service.dtd">
-        <service-group>
-          <name replace-wildcards="yes">%h</name>
-          <service>
-            <type>_smb._tcp</type>
-            <port>445</port>
-          </service>
-        </service-group>
-     '';
     };
   };
 
@@ -160,9 +110,7 @@
   security.acme.email = "pyry.kontio@drasa.eu";
 
   # Open ports in the firewall.
-  # 445, 139, 137, 138: samba, netbios names
-  networking.firewall.allowedTCPPorts = [ 445 139 80 443 ];
-  networking.firewall.allowedUDPPorts = [ 137 138 ];
+  networking.firewall.allowedTCPPorts = [ 80 443 ];
 
   # Enable CUPS to print documents.
   # services.printing.enable = true;

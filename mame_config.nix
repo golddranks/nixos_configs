@@ -2,8 +2,6 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-let pubkeys = import ./pubkeys.nix; in
-
 { config, pkgs, ... }:
 
 {
@@ -32,6 +30,21 @@ let pubkeys = import ./pubkeys.nix; in
       fsType = "ext4";
       options = [ "nofail" ];
     };
+
+  fileSystems."/srv/samba/Kuvat" = {
+    device = "/mnt/Avaruus/@varmuus/Kuvi";
+    options = [ "bind" ];
+  };
+
+  fileSystems."/srv/samba/Musiikki" = {
+    device = "/mnt/Avaruus/@varmuus/Musiikki";
+    options = [ "bind" ];
+  };
+
+  fileSystems."/srv/samba/Downloads" = {
+    device = "/mnt/Avaruus/@varmuus/Downloads";
+    options = [ "bind" ];
+  };
 
   security.sudo.extraConfig = ''
     Defaults        timestamp_timeout=45
@@ -85,16 +98,21 @@ let pubkeys = import ./pubkeys.nix; in
   # services.xserver.libinput.enable = true;
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
-  users.users.kon = {
-    isNormalUser = true;
-    description = "Pyry Kontio";
-    extraGroups = [ "wheel" "networkmanager" ];
+  users.users = {
+    kon = {
+      isNormalUser = true;
+      description = "Pyry Kontio";
+      extraGroups = [ "wheel" "networkmanager" "docker" ];
+    };
+    samba = {
+      description = "Samba";
+    };
   };
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-    wget vim pstree lsof rsync
+    wget vim pstree lsof rsync ripgrep fd
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
@@ -115,6 +133,34 @@ let pubkeys = import ./pubkeys.nix; in
   services.openssh.permitRootLogin = "no";
   services.fail2ban.enable = true;
 
+  services.samba = {
+    enable = false;
+    securityType = "user";
+    extraConfig = ''
+      workgroup = WORKGROUP
+      server string = mame
+      netbios name = mame
+      security = user
+      guest account = nobody
+      map to guest = bad user
+      # These might affect version compatibility?!
+      use sendfile = yes
+      server min protocol = SMB3_00
+    '';
+    shares = {
+      Filesaari = {
+        path = "/srv/samba";
+        browseable = "yes";
+        "read only" = "no";
+        "guest ok" = "yes";
+        "create mask" = "0644";
+        "directory mask" = "0755";
+        "force user" = "samba";
+        "force group" = "users";
+      };
+    };
+  };
+  
   # AVAHI: Publish this server and its address on the network
   services.avahi = {
     enable = true;
@@ -155,10 +201,9 @@ let pubkeys = import ./pubkeys.nix; in
   virtualisation.docker.enable = true;
 
   # Open ports in the firewall.
-  networking.firewall.allowedTCPPorts = [ 80 443 ];
-  # networking.firewall.allowedUDPPorts = [ ... ];
-  # Or disable the firewall altogether.
-  # networking.firewall.enable = false;
+  # 445, 139, 137, 138: samba, netbios names
+  networking.firewall.allowedTCPPorts = [ 445 139 80 443 ];
+  networking.firewall.allowedUDPPorts = [ 137 138 ];
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
