@@ -21,6 +21,18 @@ let pubkeys = import ./pubkeys.nix; in
   # Define on which hard drive you want to install Grub.
   boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
 
+  fileSystems."/mnt/Avaruus" =
+    { device = "/dev/disk/by-uuid/3d293e93-b66c-462f-8451-84c2c5f25e7f";
+      fsType = "btrfs";
+      options = [ "nofail" ];
+    };
+
+  fileSystems."/mnt/Valtavuus" =
+    { device = "/dev/disk/by-uuid/a810a776-7a19-4cfe-b406-401554027879";
+      fsType = "ext4";
+      options = [ "nofail" ];
+    };
+
   security.sudo.extraConfig = ''
     Defaults        timestamp_timeout=45
   '';
