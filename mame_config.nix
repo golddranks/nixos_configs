@@ -134,7 +134,7 @@
   services.fail2ban.enable = true;
 
   services.samba = {
-    enable = false;
+    enable = true;
     securityType = "user";
     extraConfig = ''
       workgroup = WORKGROUP
@@ -188,14 +188,35 @@
 
   # NGINX
   services.nginx.enable = true;
-  services.nginx.virtualHosts."mame.drasa.eu" = {
+  services.nginx.virtualHosts = {
+    "mame.drasa.eu" = {
       enableACME = true;
       forceSSL = true;
       root = "/srv/www/mame.drasa.eu";
+    };
+    "bitwarden.drasa.eu" = {
+      enableACME = true;
+      forceSSL = true;
+      locations."/" = {
+        proxyPass = "http://localhost:8080";
+      };
+    };
   };
   services.nginx.appendHttpConfig = "charset UTF-8;";
   security.acme.acceptTerms = true;
   security.acme.email = "pyry.kontio@drasa.eu";
+
+  services.bitwarden_rs = {
+    enable = true;
+    backupDir = "/srv/bitwarden-backup";
+    config = {
+      domain = "https://bitwarden.drasa.eu:666";
+      signupsAllowed = true;
+      rocketPort = 8080;
+      rocketLog = "critical";
+    };
+  };
+
 
   # DOCKER
   virtualisation.docker.enable = true;
