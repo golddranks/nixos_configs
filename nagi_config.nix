@@ -115,27 +115,6 @@
   # Enable CUPS to print documents.
   # services.printing.enable = true;
 
-/*
-  services.hostapd = {
-    enable = true;
-    ssid = "Skeletor 2.5Ghz";
-    wpaPassphrase = "35732778";
-    interface = "wlp6s0";
-    hwMode = "g";
-    channel = 6;
-    # countryCode = "JP"; # enable this when on NixOS 20.09
-    extraConfig = ''
-      country_code=JP
-      # required for 802.11n https://wiki.gentoo.org/wiki/Hostapd#802.11b.2Fg.2Fn_with_WPA2-PSK_and_CCMP
-      rsn_pairwise=CCMP
-      ieee80211n=1
-      wmm_enabled=1
-      '';
-  };
-*/
-
- services.udev.packages = [ pkgs.crda ];
-
   # Enable sound.
   sound.enable = true;
   hardware.pulseaudio.enable = true;
@@ -167,9 +146,6 @@
       isNormalUser = true;
       description = "Pyry Kontio";
       extraGroups = [ "wheel" "networkmanager" "docker" ];
-    };
-    samba = {
-      description = "Samba";
     };
   };
 
