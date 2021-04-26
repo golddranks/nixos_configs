@@ -210,7 +210,7 @@
     enable = true;
     backupDir = "/srv/bitwarden-backup";
     config = {
-      domain = "https://bitwarden.drasa.eu:666";
+      domain = "https://bitwarden.drasa.eu:8080";
       signupsAllowed = true;
       rocketPort = 8080;
       rocketLog = "critical";
