@@ -228,6 +228,7 @@
     enable = true;
     user = "kon";
     dataDir = "/mnt/Avaruus/@varmuus/PyrySyncthing";
+    openDefaultPorts = true;
   };
 
   # DOCKER
