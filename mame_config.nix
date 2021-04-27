@@ -217,6 +217,11 @@
     };
   };
 
+  services.syncthing = {
+    enable = true;
+    user = "kon";
+    dataDir = "/mnt/Avaruus/@varmuus/PyrySyncthing";
+  };
 
   # DOCKER
   virtualisation.docker.enable = true;
