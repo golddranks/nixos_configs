@@ -31,18 +31,28 @@
       options = [ "nofail" ];
     };
 
-  fileSystems."/srv/samba/Kuvat" = {
+  fileSystems."/srv/samba/Filesaari/Kuvat" = {
     device = "/mnt/Avaruus/@varmuus/Kuvi";
     options = [ "bind" ];
   };
 
-  fileSystems."/srv/samba/Musiikki" = {
+  fileSystems."/srv/samba/Filesaari/Musiikki" = {
     device = "/mnt/Avaruus/@varmuus/Musiikki";
     options = [ "bind" ];
   };
 
-  fileSystems."/srv/samba/Downloads" = {
+  fileSystems."/srv/samba/Filesaari/Downloads" = {
     device = "/mnt/Avaruus/@varmuus/Downloads";
+    options = [ "bind" ];
+  };
+
+  fileSystems."/srv/samba/KonOnePlus/Pictures" = {
+    device = "/mnt/Avaruus/@varmuus/Syncthing/Pictures";
+    options = [ "bind" ];
+  };
+
+  fileSystems."/srv/samba/KonOnePlus/カメラ" = {
+    device = "/mnt/Avaruus/@varmuus/Syncthing/カメラ";
     options = [ "bind" ];
   };
 
@@ -136,6 +146,7 @@
   services.samba = {
     enable = true;
     securityType = "user";
+    syncPasswordsByPam = true;
     extraConfig = ''
       workgroup = WORKGROUP
       server string = mame
@@ -149,10 +160,21 @@
     '';
     shares = {
       Filesaari = {
-        path = "/srv/samba";
+        path = "/srv/samba/Filesaari";
         browseable = "yes";
         "read only" = "no";
         "guest ok" = "yes";
+        "create mask" = "0644";
+        "directory mask" = "0755";
+        "force user" = "samba";
+        "force group" = "users";
+      };
+      KonOnePlus = {
+        path = "/srv/samba/KonOnePlus";
+        browseable = "yes";
+        "read only" = "yes";
+        "guest ok" = "no";
+        "valid users" = "kon";
         "create mask" = "0644";
         "directory mask" = "0755";
         "force user" = "samba";
