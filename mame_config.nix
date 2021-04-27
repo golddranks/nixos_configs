@@ -226,8 +226,7 @@
 
   services.syncthing = {
     enable = true;
-    user = "kon";
-    dataDir = "/mnt/Avaruus/@varmuus/PyrySyncthing";
+    dataDir = "/mnt/Avaruus/@varmuus/Syncthing";
     openDefaultPorts = true;
   };
 
