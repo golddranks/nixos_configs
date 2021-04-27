@@ -201,6 +201,13 @@
         proxyPass = "http://localhost:8080";
       };
     };
+    "syncthing.drasa.eu" = {
+      enableACME = true;
+      forceSSL = true;
+      locations."/" = {
+        proxyPass = "http://localhost:8384";
+      };
+    };
   };
   services.nginx.appendHttpConfig = "charset UTF-8;";
   security.acme.acceptTerms = true;
