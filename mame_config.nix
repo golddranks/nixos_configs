@@ -46,6 +46,11 @@
     options = [ "bind" ];
   };
 
+  fileSystems."/srv/samba/Filesaari/Anime" = {
+    device = "/mnt/Valtavuus/Video/animu";
+    options = [ "bind" ];
+  };
+
   fileSystems."/srv/samba/KonOnePlus/Pictures" = {
     device = "/mnt/Avaruus/@varmuus/Syncthing/Pictures";
     options = [ "bind" ];
@@ -53,6 +58,16 @@
 
   fileSystems."/srv/samba/KonOnePlus/カメラ" = {
     device = "/mnt/Avaruus/@varmuus/Syncthing/カメラ";
+    options = [ "bind" ];
+  };
+
+  fileSystems."/srv/samba/WebShare" = {
+    device = "/mnt/Valtavuus/WebShare";
+    options = [ "bind" ];
+  };
+
+  fileSystems."/srv/www/webshare.drasa.eu" = {
+    device = "/mnt/Valtavuus/WebShare";
     options = [ "bind" ];
   };
 
@@ -180,6 +195,16 @@
         "force user" = "samba";
         "force group" = "users";
       };
+      WebShare = {
+        path = "/srv/samba/WebShare";
+        browseable = "yes";
+        "read only" = "no";
+        "guest ok" = "yes";
+        "create mask" = "0644";
+        "directory mask" = "0755";
+        "force user" = "samba";
+        "force group" = "users";
+      };
     };
   };
   
@@ -216,19 +241,21 @@
       forceSSL = true;
       root = "/srv/www/mame.drasa.eu";
     };
+    "webshare.drasa.eu" = {
+      enableACME = true;
+      forceSSL = true;
+      root = "/srv/www/webshare.drasa.eu";
+      locations."/".extraConfig = "autoindex on;";
+    };
     "bitwarden.drasa.eu" = {
       enableACME = true;
       forceSSL = true;
-      locations."/" = {
-        proxyPass = "http://localhost:8080";
-      };
+      locations."/".proxyPass = "http://localhost:8080";
     };
     "syncthing.drasa.eu" = {
       enableACME = true;
       forceSSL = true;
-      locations."/" = {
-        proxyPass = "http://localhost:8384";
-      };
+      locations."/".proxyPass = "http://localhost:8384";
     };
   };
   services.nginx.appendHttpConfig = "charset UTF-8;";
