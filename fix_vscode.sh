@@ -1,6 +1,6 @@
 #!/bin/sh
 
-nix-env -iA nixos.nodejs-12_x
+nix-env -iA nixos.nodejs-14_x
 for DIR in $HOME/.vscode-server/bin/*; do
     cd $DIR
     rm -f node

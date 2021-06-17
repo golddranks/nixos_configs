@@ -10,14 +10,8 @@
       /etc/nixos/hardware-configuration.nix
     ];
 
-  # Use the GRUB 2 boot loader.
-  boot.loader.grub.enable = true;
-  boot.loader.grub.version = 2;
-  # boot.loader.grub.efiSupport = true;
-  # boot.loader.grub.efiInstallAsRemovable = true;
-  # boot.loader.efi.efiSysMountPoint = "/boot/efi";
-  # Define on which hard drive you want to install Grub.
-  boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
+  boot.loader.systemd-boot.enable = true;
+  boot.loader.efi.canTouchEfiVariables = true;
 
   fileSystems."/mnt/Avaruus" =
     { device = "/dev/disk/by-uuid/3d293e93-b66c-462f-8451-84c2c5f25e7f";
@@ -31,8 +25,33 @@
       options = [ "nofail" ];
     };
 
-  fileSystems."/srv/samba/Filesaari/Kuvat" = {
-    device = "/mnt/Avaruus/@varmuus/Kuvi";
+  fileSystems."/srv/samba/Filesaari/OmatKuvat" = {
+    device = "/mnt/Avaruus/@varmuus/OmatKuvat";
+    options = [ "bind" ];
+  };
+
+  fileSystems."/srv/samba/Filesaari/OmatVideot" = {
+    device = "/mnt/Avaruus/@varmuus/OmatVideot";
+    options = [ "bind" ];
+  };
+
+  fileSystems."/srv/samba/Filesaari/EditoidutVideot" = {
+    device = "/mnt/Avaruus/@varmuus/EditoidutVideot";
+    options = [ "bind" ];
+  };
+
+  fileSystems."/srv/samba/Filesaari/Dokumentit" = {
+    device = "/mnt/Avaruus/@varmuus/Dokumentit";
+    options = [ "bind" ];
+  };
+
+  fileSystems."/srv/samba/Filesaari/TutkimusPDF" = {
+    device = "/mnt/Avaruus/@varmuus/TutkimusPDF";
+    options = [ "bind" ];
+  };
+
+  fileSystems."/srv/samba/Filesaari/MuutaArvokasta" = {
+    device = "/mnt/Avaruus/@varmuus/MuutaArvokasta";
     options = [ "bind" ];
   };
 
@@ -41,23 +60,13 @@
     options = [ "bind" ];
   };
 
-  fileSystems."/srv/samba/Filesaari/Downloads" = {
-    device = "/mnt/Avaruus/@varmuus/Downloads";
+  fileSystems."/srv/samba/KonOnePlus" = {
+    device = "/mnt/Avaruus/@varmuus/Syncthing/KonOnePlus";
     options = [ "bind" ];
   };
 
   fileSystems."/srv/samba/Filesaari/Anime" = {
     device = "/mnt/Valtavuus/Video/animu";
-    options = [ "bind" ];
-  };
-
-  fileSystems."/srv/samba/KonOnePlus/Pictures" = {
-    device = "/mnt/Avaruus/@varmuus/Syncthing/Pictures";
-    options = [ "bind" ];
-  };
-
-  fileSystems."/srv/samba/KonOnePlus/カメラ" = {
-    device = "/mnt/Avaruus/@varmuus/Syncthing/カメラ";
     options = [ "bind" ];
   };
 
@@ -131,6 +140,7 @@
     };
     samba = {
       description = "Samba";
+      isSystemUser = true;
     };
   };
 
@@ -161,7 +171,6 @@
   services.samba = {
     enable = true;
     securityType = "user";
-    syncPasswordsByPam = true;
     extraConfig = ''
       workgroup = WORKGROUP
       server string = mame
@@ -239,6 +248,7 @@
     "mame.drasa.eu" = {
       enableACME = true;
       forceSSL = true;
+      default = true;
       root = "/srv/www/mame.drasa.eu";
     };
     "webshare.drasa.eu" = {
