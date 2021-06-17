@@ -175,6 +175,7 @@
     shell = "/bin/clear_env.sh";
     home = "/home";
     description = "An user for sending files via SCP/rsync";
+    isSystemUser = true;
   };
   users.groups.dropbox.members = [ "dropbox" ];
   fileSystems."/".options = [ "usrjquota=aquota.user,jqfmt=vfsv1" ];
