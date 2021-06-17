@@ -27,57 +27,57 @@
 
   fileSystems."/srv/samba/Filesaari/OmatKuvat" = {
     device = "/mnt/Avaruus/@varmuus/OmatKuvat";
-    options = [ "bind" ];
+    options = [ "bind" "nofail" ];
   };
 
   fileSystems."/srv/samba/Filesaari/OmatVideot" = {
     device = "/mnt/Avaruus/@varmuus/OmatVideot";
-    options = [ "bind" ];
+    options = [ "bind" "nofail" ];
   };
 
   fileSystems."/srv/samba/Filesaari/EditoidutVideot" = {
     device = "/mnt/Avaruus/@varmuus/EditoidutVideot";
-    options = [ "bind" ];
+    options = [ "bind" "nofail" ];
   };
 
   fileSystems."/srv/samba/Filesaari/Dokumentit" = {
     device = "/mnt/Avaruus/@varmuus/Dokumentit";
-    options = [ "bind" ];
+    options = [ "bind" "nofail" ];
   };
 
   fileSystems."/srv/samba/Filesaari/TutkimusPDF" = {
     device = "/mnt/Avaruus/@varmuus/TutkimusPDF";
-    options = [ "bind" ];
+    options = [ "bind" "nofail" ];
   };
 
   fileSystems."/srv/samba/Filesaari/MuutaArvokasta" = {
     device = "/mnt/Avaruus/@varmuus/MuutaArvokasta";
-    options = [ "bind" ];
+    options = [ "bind" "nofail" ];
   };
 
   fileSystems."/srv/samba/Filesaari/Musiikki" = {
     device = "/mnt/Avaruus/@varmuus/Musiikki";
-    options = [ "bind" ];
+    options = [ "bind" "nofail" ];
   };
 
   fileSystems."/srv/samba/KonOnePlus" = {
     device = "/mnt/Avaruus/@varmuus/Syncthing/KonOnePlus";
-    options = [ "bind" ];
+    options = [ "bind" "nofail" ];
   };
 
   fileSystems."/srv/samba/Filesaari/Anime" = {
     device = "/mnt/Valtavuus/Video/animu";
-    options = [ "bind" ];
+    options = [ "bind" "nofail" ];
   };
 
   fileSystems."/srv/samba/WebShare" = {
     device = "/mnt/Valtavuus/WebShare";
-    options = [ "bind" ];
+    options = [ "bind" "nofail" ];
   };
 
   fileSystems."/srv/www/webshare.drasa.eu" = {
     device = "/mnt/Valtavuus/WebShare";
-    options = [ "bind" ];
+    options = [ "bind" "nofail" ];
   };
 
   security.sudo.extraConfig = ''
