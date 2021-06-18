@@ -8,47 +8,39 @@
   imports =
     [ # Include the results of the hardware scan.
       /etc/nixos/hardware-configuration.nix
-      /home/kon/raspberrypi_boot/nixos/modules/system/boot/loader/raspberrypi/raspberrypi.nix
     ];
 
-  nixpkgs.config = {
-    allowUnfree = true;
-#    packageOverrides = super: {
-#      raspberrypifw = super.callPackage /home/kon/raspberrypi_firmware/default.nix {};
-#      linux_rpi4 = super.callPackage /home/kon/raspberrypi_kernel/linux-rpi.nix {
-#        kernelPatches = with super.kernelPatches; [
-#          bridge_stp_helper
-#          request_key_helper
-#        ];
-#        rpiVersion = 4;
-#      };
-#    };
+
+  boot = {
+    kernelPackages = pkgs.linuxPackages_rpi4;
+    tmpOnTmpfs = true;
+    initrd.availableKernelModules = [ "usbhid" "usb_storage" ];
+    # ttyAMA0 is the serial console broken out to the GPIO
+    kernelParams = [
+        "8250.nr_uarts=1"
+        "console=ttyAMA0,115200"
+        "console=tty1"
+        # Some gui programs need this
+        "cma=128M"
+    ];
   };
 
-  disabledModules = [ "system/boot/loader/raspberrypi/raspberrypi.nix" ];
-
+  boot.loader.raspberryPi = {
+    enable = true;
+    version = 4;
+  };
   boot.loader.grub.enable = false;
-  boot.loader.raspberryPi.enable = true;
-  boot.loader.raspberryPi.version = 4;
-  boot.loader.raspberryPi.firmwareConfig = "dtparam=sd_poll_once=on";
-  boot.loader.raspberryPi.configurationLimit = 5;
-  boot.kernelPackages = pkgs.linuxPackages_rpi4;
+  boot.loader.generic-extlinux-compatible.enable = true;
 
-  # Use the GRUB 2 boot loader.
-  # boot.loader.grub.enable = true;
-  # boot.loader.grub.version = 2;
-  # boot.loader.grub.efiSupport = true;
-  # boot.loader.grub.efiInstallAsRemovable = true;
-  # boot.loader.efi.efiSysMountPoint = "/boot/efi";
-  # Define on which hard drive you want to install Grub.
-  # boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
-  
-  security.sudo.extraConfig = ''
-    Defaults        timestamp_timeout=45
-  '';
+  # Required for the Wireless firmware
+  hardware.enableRedistributableFirmware = true;
 
   networking.hostName = "poi"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
+
+  security.sudo.extraConfig = ''
+    Defaults        timestamp_timeout=45
+  '';
 
   # Set your time zone.
   time.timeZone = "Asia/Tokyo";
@@ -146,7 +138,8 @@
   services.nginx.virtualHosts."poi.drasa.eu" = {
       enableACME = true;
       forceSSL = true;
-      root = "/srv/www/poi.drasa.eu";
+      default = true;
+      root = "/srv/www/poi.drasa.eu2";
   };
   services.nginx.appendHttpConfig = "charset UTF-8;";
   security.acme.acceptTerms = true;
