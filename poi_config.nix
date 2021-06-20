@@ -8,32 +8,8 @@
   imports =
     [ # Include the results of the hardware scan.
       /etc/nixos/hardware-configuration.nix
+      "${fetchTarball "https://github.com/NixOS/nixos-hardware/archive/936e4649098d6a5e0762058cb7687be1b2d90550.tar.gz" }/raspberry-pi/4"
     ];
-
-
-  boot = {
-    kernelPackages = pkgs.linuxPackages_rpi4;
-    tmpOnTmpfs = true;
-    initrd.availableKernelModules = [ "usbhid" "usb_storage" ];
-    # ttyAMA0 is the serial console broken out to the GPIO
-    kernelParams = [
-        "8250.nr_uarts=1"
-        "console=ttyAMA0,115200"
-        "console=tty1"
-        # Some gui programs need this
-        "cma=128M"
-    ];
-  };
-
-  boot.loader.raspberryPi = {
-    enable = true;
-    version = 4;
-  };
-  boot.loader.grub.enable = false;
-  boot.loader.generic-extlinux-compatible.enable = true;
-
-  # Required for the Wireless firmware
-  hardware.enableRedistributableFirmware = true;
 
   networking.hostName = "poi"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
@@ -139,7 +115,7 @@
       enableACME = true;
       forceSSL = true;
       default = true;
-      root = "/srv/www/poi.drasa.eu2";
+      root = "/srv/www/poi.drasa.eu";
   };
   services.nginx.appendHttpConfig = "charset UTF-8;";
   security.acme.acceptTerms = true;
