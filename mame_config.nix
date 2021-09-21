@@ -165,7 +165,7 @@
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-    wget vim pstree tree lsof rsync ripgrep fd
+    wget vim pstree tree lsof rsync pciutils ripgrep fd
   ];
 
   # Some programs need SUID wrappers, can be configured further or are

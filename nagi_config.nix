@@ -61,7 +61,7 @@
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-    wget vim pstree tree lsof rsync pciutils ripgrep fd gcc
+    wget vim pstree tree lsof rsync pciutils ripgrep fd
   ];
 
   system.autoUpgrade.enable = true;
