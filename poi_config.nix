@@ -5,6 +5,14 @@
 { config, pkgs, ... }:
 
 {
+
+  nix = {
+    package = pkgs.nixUnstable;
+    extraOptions = ''
+      experimental-features = nix-command flakes
+    '';
+  };
+
   imports =
     [ # Include the results of the hardware scan.
       /etc/nixos/hardware-configuration.nix
@@ -74,7 +82,7 @@
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-    wget vim pstree lsof rsync
+    wget vim pstree lsof rsync go
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
