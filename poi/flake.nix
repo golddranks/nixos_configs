@@ -5,7 +5,7 @@
 
   outputs = { self, nixpkgs, nixos-hardware }: {
     nixosConfigurations.poi = nixpkgs.lib.nixosSystem {
-      system = "x86_64-linux";
+      system = "aarch64-linux";
       modules = [
         ./configuration.nix
         nixos-hardware.nixosModules.raspberry-pi-4
