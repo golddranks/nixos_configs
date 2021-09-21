@@ -3,7 +3,7 @@
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
 { config, pkgs, ... }:
-let chkp = builtins.getFlake (toString /home/kon/repos/checkup-nix); in
+
 {
 
   nix = {
@@ -15,9 +15,7 @@ let chkp = builtins.getFlake (toString /home/kon/repos/checkup-nix); in
 
   imports =
     [ # Include the results of the hardware scan.
-      /etc/nixos/hardware-configuration.nix
-      "${fetchTarball "https://github.com/NixOS/nixos-hardware/archive/936e4649098d6a5e0762058cb7687be1b2d90550.tar.gz" }/raspberry-pi/4"
-      chkp.nixosModules.aarch64-linux
+      ./hardware-configuration.nix
     ];
 
   networking.hostName = "poi"; # Define your hostname.
