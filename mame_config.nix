@@ -5,6 +5,14 @@
 { config, pkgs, ... }:
 
 {
+
+  nix = {
+    package = pkgs.nixUnstable;
+    extraOptions = ''
+      experimental-features = nix-command flakes
+    '';
+  };
+
   imports =
     [ # Include the results of the hardware scan.
       /etc/nixos/hardware-configuration.nix
@@ -55,6 +63,11 @@
     options = [ "bind" "nofail" ];
   };
 
+  fileSystems."/srv/samba/Filesaari/EiNiinArvokasta" = {
+    device = "/mnt/Valtavuus/EiNiinArvokasta";
+    options = [ "bind" "nofail" ];
+  };
+
   fileSystems."/srv/samba/Filesaari/Musiikki" = {
     device = "/mnt/Avaruus/@varmuus/Musiikki";
     options = [ "bind" "nofail" ];
@@ -67,6 +80,11 @@
 
   fileSystems."/srv/samba/Filesaari/Anime" = {
     device = "/mnt/Valtavuus/Video/animu";
+    options = [ "bind" "nofail" ];
+  };
+
+  fileSystems."/srv/samba/Filesaari/Valtavuus" = {
+    device = "/mnt/Valtavuus";
     options = [ "bind" "nofail" ];
   };
 
