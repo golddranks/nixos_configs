@@ -128,6 +128,46 @@
   security.acme.acceptTerms = true;
   security.acme.email = "pyry.kontio@drasa.eu";
 
+  services.checkup = {
+    enable = true;
+    every = "20s";
+    checkers = [
+      {
+          type = "http";
+          endpoint_name = "Syncthing HTTP";
+          endpoint_url = "https://syncthing.drasa.eu";
+          up_status = 401;
+      }
+      {
+          type = "http";
+          endpoint_name = "Mame HTTP";
+          endpoint_url = "https://mame.drasa.eu";
+      }
+      {
+          type = "http";
+          endpoint_name = "Poi HTTP";
+          endpoint_url = "https://poi.drasa.eu";
+      }
+      {
+          type = "tcp";
+          endpoint_name = "Poi SSH";
+          endpoint_url = "poi.drasa.eu:22";
+      }
+      {
+          type = "tcp";
+          endpoint_name = "Mame SSH";
+          endpoint_url = "mame.drasa.eu:22";
+      }
+      {
+          type = "tcp";
+          endpoint_name = "Syncthing TCP (IPv6)";
+          endpoint_url = "syncthing.drasa.eu:22000";
+      }
+    ];
+    notifiers = [];
+    statusPagePort = 3000;
+  };
+
   # DOCKER
   virtualisation.docker.enable = true;
 
