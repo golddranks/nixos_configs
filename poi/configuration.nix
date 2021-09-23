@@ -130,7 +130,7 @@
 
   services.checkup = {
     enable = true;
-    every = "20s";
+    every = "30s";
     checkers = [
       {
         type = "http";
