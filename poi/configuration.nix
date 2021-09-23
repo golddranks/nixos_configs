@@ -176,7 +176,7 @@
       {
         type = "http";
         endpoint_name = "Accent Ganbare";
-        endpoint_url = "https://accent.ganba.re";
+        endpoint_url = "https://accent.ganba.re/login";
       }
       {
         type = "tcp";
