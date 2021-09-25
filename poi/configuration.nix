@@ -162,11 +162,13 @@
         type = "http";
         endpoint_name = "Saunoja";
         endpoint_url = "https://saunoja.jp";
+        attempts = 2;
       }
       {
         type = "http";
         endpoint_name = "Saunoja Analytics";
         endpoint_url = "https://analytics.saunoja.jp";
+        attempts = 2;
       }
       {
         type = "http";
@@ -205,14 +207,14 @@
       }
     ];
     notifiers = [];
-    statusPagePort = 3000;
+    statusPage = "0.0.0.0:3000";
   };
 
   # DOCKER
   virtualisation.docker.enable = true;
 
   # Open ports in the firewall.
-  networking.firewall.allowedTCPPorts = [ 80 443 ];
+  networking.firewall.allowedTCPPorts = [ 80 443 3000 ];
   # networking.firewall.allowedUDPPorts = [ ... ];
   # Or disable the firewall altogether.
   # networking.firewall.enable = false;
