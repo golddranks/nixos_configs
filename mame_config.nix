@@ -307,6 +307,10 @@
     openDefaultPorts = true;
   };
 
+  systemd.services.syncthing.unitConfig = {
+    "RequiresMountsFor" = "/mnt/Avaruus/@varmuus/Syncthing";
+  };
+
   # DOCKER
   virtualisation.docker.enable = true;
 
