@@ -7,6 +7,7 @@
 {
 
   nix = {
+    gc.automatic = true;
     package = pkgs.nix_2_4;
   };
 
