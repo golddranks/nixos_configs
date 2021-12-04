@@ -207,6 +207,8 @@
     notifiers = [];
     statusPage = "0.0.0.0:3000";
   };
+  users.users.checkup.group = "checkup";
+  users.groups.checkup = {};
 
   # DOCKER
   virtualisation.docker.enable = true;
@@ -232,8 +234,9 @@
     home = "/home";
     description = "An user for sending files via SCP/rsync";
     isSystemUser = true;
+    group = "dropbox";
   };
-  users.groups.dropbox.members = [ "dropbox" ];
+  users.groups.dropbox = {};
   fileSystems."/".options = [ "usrjquota=aquota.user,jqfmt=vfsv1" ];
   systemd.mounts = [
     {
