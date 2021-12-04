@@ -20,6 +20,7 @@
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
+  boot.loader.systemd-boot.configurationLimit = 30;
 
   fileSystems."/mnt/Avaruus" =
     { device = "/dev/disk/by-uuid/3d293e93-b66c-462f-8451-84c2c5f25e7f";
@@ -293,7 +294,7 @@
   security.acme.acceptTerms = true;
   security.acme.email = "pyry.kontio@drasa.eu";
 
-  services.bitwarden_rs = {
+  services.vaultwarden = {
     enable = true;
     backupDir = "/srv/bitwarden-backup";
     config = {

@@ -1,5 +1,5 @@
 {
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-21.05";
+  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-21.11";
   inputs.nixos-hardware.url = "github:NixOS/nixos-hardware/master";
   inputs.checkup.url = "github:golddranks/checkup-nix";
 

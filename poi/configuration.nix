@@ -7,10 +7,7 @@
 {
 
   nix = {
-    package = pkgs.nixUnstable;
-    extraOptions = ''
-      experimental-features = nix-command flakes
-    '';
+    package = pkgs.nix_2_4;
   };
 
   imports =
