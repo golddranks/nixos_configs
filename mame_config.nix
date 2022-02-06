@@ -188,6 +188,7 @@
   services.openssh.permitRootLogin = "no";
   services.fail2ban.enable = true;
 
+  services.samba-wsdd.enable = true;
   services.samba = {
     enable = true;
     securityType = "user";
