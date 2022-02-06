@@ -319,8 +319,9 @@
 
   # Open ports in the firewall.
   # 445, 139, 137, 138: samba, netbios names
-  networking.firewall.allowedTCPPorts = [ 445 139 80 443 ];
-  networking.firewall.allowedUDPPorts = [ 137 138 ];
+  # 5357, 3702: Web Service Discovery for Windows 10 & Samba
+  networking.firewall.allowedTCPPorts = [ 445 139 80 443 5357 ];
+  networking.firewall.allowedUDPPorts = [ 137 138 3702 ];
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
