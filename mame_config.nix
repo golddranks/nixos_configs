@@ -32,42 +32,42 @@
       options = [ "nofail" ];
     };
 
-  fileSystems."/srv/samba/Filesaari/OmatKuvat" = {
+  fileSystems."/srv/samba/OmatKuvat" = {
     device = "/mnt/Avaruus/@varmuus/OmatKuvat";
     options = [ "bind" "nofail" ];
   };
 
-  fileSystems."/srv/samba/Filesaari/OmatVideot" = {
+  fileSystems."/srv/samba/OmatVideot" = {
     device = "/mnt/Avaruus/@varmuus/OmatVideot";
     options = [ "bind" "nofail" ];
   };
 
-  fileSystems."/srv/samba/Filesaari/EditoidutVideot" = {
+  fileSystems."/srv/samba/EditoidutVideot" = {
     device = "/mnt/Avaruus/@varmuus/EditoidutVideot";
     options = [ "bind" "nofail" ];
   };
 
-  fileSystems."/srv/samba/Filesaari/Dokumentit" = {
+  fileSystems."/srv/samba/Dokumentit" = {
     device = "/mnt/Avaruus/@varmuus/Dokumentit";
     options = [ "bind" "nofail" ];
   };
 
-  fileSystems."/srv/samba/Filesaari/TutkimusPDF" = {
+  fileSystems."/srv/samba/TutkimusPDF" = {
     device = "/mnt/Avaruus/@varmuus/TutkimusPDF";
     options = [ "bind" "nofail" ];
   };
 
-  fileSystems."/srv/samba/Filesaari/MuutaArvokasta" = {
+  fileSystems."/srv/samba/MuutaArvokasta" = {
     device = "/mnt/Avaruus/@varmuus/MuutaArvokasta";
     options = [ "bind" "nofail" ];
   };
 
-  fileSystems."/srv/samba/Filesaari/EiNiinArvokasta" = {
+  fileSystems."/srv/samba/EiNiinArvokasta" = {
     device = "/mnt/Valtavuus/EiNiinArvokasta";
     options = [ "bind" "nofail" ];
   };
 
-  fileSystems."/srv/samba/Filesaari/Musiikki" = {
+  fileSystems."/srv/samba/Musiikki" = {
     device = "/mnt/Avaruus/@varmuus/Musiikki";
     options = [ "bind" "nofail" ];
   };
@@ -77,12 +77,12 @@
     options = [ "bind" "nofail" ];
   };
 
-  fileSystems."/srv/samba/Filesaari/Anime" = {
+  fileSystems."/srv/samba/Anime" = {
     device = "/mnt/Valtavuus/Video/animu";
     options = [ "bind" "nofail" ];
   };
 
-  fileSystems."/srv/samba/Filesaari/Valtavuus" = {
+  fileSystems."/srv/samba/Valtavuus" = {
     device = "/mnt/Valtavuus";
     options = [ "bind" "nofail" ];
   };
@@ -202,17 +202,16 @@
       use sendfile = yes
       server min protocol = SMB3_00
     '';
-    shares = {
-      Filesaari = {
-        path = "/srv/samba/Filesaari";
-        browseable = "yes";
-        "read only" = "no";
-        "guest ok" = "yes";
-        "create mask" = "0644";
-        "directory mask" = "0755";
-        "force user" = "samba";
-        "force group" = "users";
-      };
+    shares = let share = p: {
+          path = p;
+          browseable = "yes";
+          "read only" = "no";
+          "guest ok" = "yes";
+          "create mask" = "0644";
+          "directory mask" = "0755";
+          "force user" = "samba";
+          "force group" = "users";
+      }; in {
       KonOnePlus = {
         path = "/srv/samba/KonOnePlus";
         browseable = "yes";
@@ -224,16 +223,17 @@
         "force user" = "samba";
         "force group" = "users";
       };
-      WebShare = {
-        path = "/srv/samba/WebShare";
-        browseable = "yes";
-        "read only" = "no";
-        "guest ok" = "yes";
-        "create mask" = "0644";
-        "directory mask" = "0755";
-        "force user" = "samba";
-        "force group" = "users";
-      };
+      OmatKuvat = share "/srv/samba/OmatKuvat";
+      OmatVideot  = share "/srv/samba/OmatVideot";
+      EditoidutVideot = share "/srv/samba/EditoidutVideot";
+      Dokumentit = share "/srv/samba/Dokumentit";
+      TutkimusPDF = share "/srv/samba/TutkimusPDF";
+      MuutaArvokasta = share "/srv/samba/MuutaArvokasta";
+      EiNiinArvokasta = share "/srv/samba/EiNiinArvokasta";
+      Musiikki = share "/srv/samba/Musiikki";
+      Anime = share "/srv/samba/Anime";
+      Valtavuus = share "/srv/samba/Valtavuus";
+      WebShare = share "/srv/samba/WebShare";
     };
   };
   
