@@ -314,6 +314,9 @@
     "RequiresMountsFor" = "/mnt/Avaruus/@varmuus/Syncthing";
   };
 
+  services.iperf3.enable = true;
+  services.iperf3.openFirewall = true;
+
   # DOCKER
   virtualisation.docker.enable = true;
 
