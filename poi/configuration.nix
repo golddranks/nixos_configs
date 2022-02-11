@@ -213,7 +213,7 @@
   # users.users.checkup.group = "checkup";
   # users.groups.checkup = {};
 
-  services.iperf3.enabled = true;
+  services.iperf3.enable = true;
   services.iperf3.openFirewall = true;
 
   # DOCKER
