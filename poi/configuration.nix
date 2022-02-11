@@ -9,10 +9,14 @@
   nix = {
     gc.automatic = true;
     package = pkgs.nix_2_4;
+    extraOptions = ''
+      experimental-features = nix-command flakes
+    '';
   };
 
   imports =
     [ # Include the results of the hardware scan.
+      <nixos-hardware/raspberry-pi/4>
       ./hardware-configuration.nix
     ];
 
