@@ -32,42 +32,42 @@
       options = [ "nofail" ];
     };
 
-  fileSystems."/srv/samba/OmatKuvat" = {
+  fileSystems."/srv/samba/Filesaari/OmatKuvat" = {
     device = "/mnt/Avaruus/@varmuus/OmatKuvat";
     options = [ "bind" "nofail" ];
   };
 
-  fileSystems."/srv/samba/OmatVideot" = {
+  fileSystems."/srv/samba/Filesaari/OmatVideot" = {
     device = "/mnt/Avaruus/@varmuus/OmatVideot";
     options = [ "bind" "nofail" ];
   };
 
-  fileSystems."/srv/samba/EditoidutVideot" = {
+  fileSystems."/srv/samba/Filesaari/EditoidutVideot" = {
     device = "/mnt/Avaruus/@varmuus/EditoidutVideot";
     options = [ "bind" "nofail" ];
   };
 
-  fileSystems."/srv/samba/Dokumentit" = {
+  fileSystems."/srv/samba/Filesaari/Dokumentit" = {
     device = "/mnt/Avaruus/@varmuus/Dokumentit";
     options = [ "bind" "nofail" ];
   };
 
-  fileSystems."/srv/samba/TutkimusPDF" = {
+  fileSystems."/srv/samba/Filesaari/TutkimusPDF" = {
     device = "/mnt/Avaruus/@varmuus/TutkimusPDF";
     options = [ "bind" "nofail" ];
   };
 
-  fileSystems."/srv/samba/MuutaArvokasta" = {
+  fileSystems."/srv/samba/Filesaari/MuutaArvokasta" = {
     device = "/mnt/Avaruus/@varmuus/MuutaArvokasta";
     options = [ "bind" "nofail" ];
   };
 
-  fileSystems."/srv/samba/EiNiinArvokasta" = {
+  fileSystems."/srv/samba/Filesaari/EiNiinArvokasta" = {
     device = "/mnt/Valtavuus/EiNiinArvokasta";
     options = [ "bind" "nofail" ];
   };
 
-  fileSystems."/srv/samba/Musiikki" = {
+  fileSystems."/srv/samba/Filesaari/Musiikki" = {
     device = "/mnt/Avaruus/@varmuus/Musiikki";
     options = [ "bind" "nofail" ];
   };
@@ -77,12 +77,12 @@
     options = [ "bind" "nofail" ];
   };
 
-  fileSystems."/srv/samba/Anime" = {
+  fileSystems."/srv/samba/Filesaari/Anime" = {
     device = "/mnt/Valtavuus/Video/animu";
     options = [ "bind" "nofail" ];
   };
 
-  fileSystems."/srv/samba/Valtavuus" = {
+  fileSystems."/srv/samba/Filesaari/Valtavuus" = {
     device = "/mnt/Valtavuus";
     options = [ "bind" "nofail" ];
   };
@@ -196,6 +196,7 @@
     enable = true;
     securityType = "user";
     extraConfig = ''
+      dfree command = /usr/local/bin/dfree
       server min protocol = SMB3_00
       vfs objects = fruit streams_xattr
       fruit:metadata = stream
@@ -232,15 +233,7 @@
         "force user" = "samba";
         "force group" = "users";
       };
-      OmatKuvat = share "/srv/samba/OmatKuvat";
-      OmatVideot  = share "/srv/samba/OmatVideot";
-      EditoidutVideot = share "/srv/samba/EditoidutVideot";
-      Dokumentit = share "/srv/samba/Dokumentit";
-      TutkimusPDF = share "/srv/samba/TutkimusPDF";
-      MuutaArvokasta = share "/srv/samba/MuutaArvokasta";
-      EiNiinArvokasta = share "/srv/samba/EiNiinArvokasta";
-      Musiikki = share "/srv/samba/Musiikki";
-      Anime = share "/srv/samba/Anime";
+      Filesaari = share "/srv/samba/Filesaari";
       Valtavuus = share "/srv/samba/Valtavuus";
       WebShare = share "/srv/samba/WebShare";
     };
