@@ -82,7 +82,7 @@
     options = [ "bind" "nofail" ];
   };
 
-  fileSystems."/srv/samba/Filesaari/Valtavuus" = {
+  fileSystems."/srv/samba/Valtavuus" = {
     device = "/mnt/Valtavuus";
     options = [ "bind" "nofail" ];
   };
