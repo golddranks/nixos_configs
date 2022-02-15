@@ -4,6 +4,10 @@
 
 { config, pkgs, ... }:
 
+let dfree = pkgs.writeScriptBin "dfree" ''
+        #!/bin/sh
+        df $1 | tail -1 | awk '{print $2" "$4}'
+      ''; in
 {
 
   nix = {
@@ -166,13 +170,12 @@
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
-  environment.systemPackages = with pkgs; [
-    wget vim pstree tree lsof rsync pciutils ripgrep fd
-    writeScriptBin "dfree" ''
-      #!/bin/sh
-      df $1 | tail -1 | awk '{print $2" "$4}'
-    ''
-  ];
+
+  environment.systemPackages =
+    with pkgs;
+    [
+      wget vim pstree tree lsof rsync pciutils ripgrep fd dfree
+    ];
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
@@ -200,7 +203,7 @@
     enable = true;
     securityType = "user";
     extraConfig = ''
-      dfree command = '' + pkgs.dfree + ''
+      dfree command = '' + dfree + ''
       server min protocol = SMB3_00
       vfs objects = fruit streams_xattr
       fruit:metadata = stream
