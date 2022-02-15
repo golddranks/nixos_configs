@@ -4,12 +4,19 @@
 
 { config, pkgs, ... }:
 
-let dfree = pkgs.writeScriptBin "dfree" ''
-        #!/bin/sh
-        df $1 | tail -1 | awk '{print $2" "$4}'
-      ''; in
+let dfree = pkgs.writeShellScriptBin "dfree" ''
+  # The MacOS and Windows SMB clients just check the free space of the root folder, whith doesn't take into account
+  # the free space in the mounted folders inside, so we are manually calculating the free space as the sum of those.
+  if [ "$1" = '.' -a "$(pwd)" = "/srv/samba/Filesaari" ]; then
+    (
+      ${pkgs.coreutils}/bin/df /mnt/Valtavuus | ${pkgs.coreutils}/bin/tail -1 | ${pkgs.gawk}/bin/awk '{print $2" "$4}'
+      ${pkgs.coreutils}/bin/df /mnt/Avaruus | ${pkgs.coreutils}/bin/tail -1 | ${pkgs.gawk}/bin/awk '{print $2" "$4}'
+    ) | ${pkgs.gawk}/bin/awk '{i = i + $1}{j = j + $2} END {printf "%d %d \n", i, j}'
+  else
+    ${pkgs.coreutils}/bin/df "$1" | ${pkgs.coreutils}/bin/tail -1 | ${pkgs.gawk}/bin/awk '{print $2" "$4}'
+  fi
+''; in
 {
-
   nix = {
     gc.automatic = true;
     package = pkgs.nix_2_4;
@@ -203,7 +210,7 @@ let dfree = pkgs.writeScriptBin "dfree" ''
     enable = true;
     securityType = "user";
     extraConfig = ''
-      dfree command = '' + dfree + ''
+      dfree command = "'' + dfree + ''/bin/dfree"
       server min protocol = SMB3_00
       vfs objects = fruit streams_xattr
       fruit:metadata = stream
