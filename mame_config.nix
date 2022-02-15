@@ -188,11 +188,20 @@
   services.openssh.permitRootLogin = "no";
   services.fail2ban.enable = true;
 
+  # Enable Windows 10 to find the samba shares:
   services.samba-wsdd.enable = true;
+
+  # Remember to set `defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool TRUE` on MacOS to speed up samba!
   services.samba = {
     enable = true;
     securityType = "user";
     extraConfig = ''
+      server min protocol = SMB3_00
+      vfs objects = fruit streams_xattr
+      fruit:metadata = stream
+      fruit:veto_appledouble = no
+      fruit:wipe_intentionally_left_blank_rfork = yes
+      fruit:delete_empty_adfiles = yes
       workgroup = WORKGROUP
       server string = mame
       netbios name = mame
@@ -201,7 +210,6 @@
       map to guest = bad user
       # These might affect version compatibility?!
       use sendfile = yes
-      server min protocol = SMB3_00
     '';
     shares = let share = p: {
           path = p;
