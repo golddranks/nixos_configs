@@ -168,6 +168,10 @@
   # $ nix search wget
   environment.systemPackages = with pkgs; [
     wget vim pstree tree lsof rsync pciutils ripgrep fd
+    writeScriptBin "dfree" ''
+      #!/bin/sh
+      df $1 | tail -1 | awk '{print $2" "$4}'
+    ''
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
@@ -196,7 +200,7 @@
     enable = true;
     securityType = "user";
     extraConfig = ''
-      dfree command = /usr/local/bin/dfree
+      dfree command = '' + pkgs.dfree + ''
       server min protocol = SMB3_00
       vfs objects = fruit streams_xattr
       fruit:metadata = stream
