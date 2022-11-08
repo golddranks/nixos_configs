@@ -1,64 +1,12 @@
 {
   "nodes": {
-    "checkup": {
-      "inputs": {
-        "checkup": "checkup_2",
-        "flake-utils": "flake-utils",
-        "nixpkgs": "nixpkgs",
-        "systemd-nix": "systemd-nix"
-      },
-      "locked": {
-        "lastModified": 1632554340,
-        "narHash": "sha256-KF8gvFmK1HEcxJj1zTC5tU4HRCHIUj2lRFH8xBZeclk=",
-        "owner": "golddranks",
-        "repo": "checkup-nix",
-        "rev": "bb627c9478c065b3ed6a5cbd8521bd1b1537df2c",
-        "type": "github"
-      },
-      "original": {
-        "owner": "golddranks",
-        "repo": "checkup-nix",
-        "type": "github"
-      }
-    },
-    "checkup_2": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1595332162,
-        "narHash": "sha256-CTG6ccn1fHfeeCAtBVsZqfkMD4BJZj5yl/1kghmKejs=",
-        "owner": "sourcegraph",
-        "repo": "checkup",
-        "rev": "77e7567835d43fc7358b88e8e984f2dd85dacf4f",
-        "type": "github"
-      },
-      "original": {
-        "owner": "sourcegraph",
-        "repo": "checkup",
-        "type": "github"
-      }
-    },
-    "flake-utils": {
-      "locked": {
-        "lastModified": 1631561581,
-        "narHash": "sha256-3VQMV5zvxaVLvqqUrNz3iJelLw30mIVSfZmAaauM3dA=",
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "rev": "7e5bf3925f6fbdfaf50a2a7ca0be2879c4261d19",
-        "type": "github"
-      },
-      "original": {
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "type": "github"
-      }
-    },
     "nixos-hardware": {
       "locked": {
-        "lastModified": 1643980037,
-        "narHash": "sha256-RdVHt2mD408WXMjQIOLvUzy8cSUHu8NAbilDmPVxf7E=",
+        "lastModified": 1667768008,
+        "narHash": "sha256-PGbX0s2hhXGnZDFVE6UIhPSOf5YegpWs5dUXpT/14F0=",
         "owner": "NixOS",
         "repo": "nixos-hardware",
-        "rev": "9886a06e4745edb31587d0e9481ad82d35f0d593",
+        "rev": "f6483e0def85efb9c1e884efbaff45a5e7aabb34",
         "type": "github"
       },
       "original": {
@@ -70,73 +18,24 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1632418649,
-        "narHash": "sha256-4rZspkiQU7zbsuciRRMgoEPkAF/+FSv2jx/VIPxPVx4=",
-        "owner": "nixos",
-        "repo": "nixpkgs",
-        "rev": "056a3c1fae30d06d14b171b9023743c21a23ec1a",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nixos",
-        "ref": "nixos-21.05",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
-    "nixpkgs_2": {
-      "locked": {
-        "lastModified": 1632105543,
-        "narHash": "sha256-SHS2640VLZZQ+miAFaHZlVAuDfvuiv0l11Gfk2ikUdI=",
+        "lastModified": 1667821506,
+        "narHash": "sha256-u4HKBBfTOPpFsGnM7sjS0+F67Hmf2or3uHKNVxXZtiM=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "b911ce7329efee138341fe318efa08e025481931",
-        "type": "github"
-      },
-      "original": {
-        "id": "nixpkgs",
-        "type": "indirect"
-      }
-    },
-    "nixpkgs_3": {
-      "locked": {
-        "lastModified": 1644472683,
-        "narHash": "sha256-sP6iM4NksOYO6NFfTJ96cg+ClPnq6cdY30xKA1iYtyU=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "7adc9c14ec74b27358a8df9b973087e351425a79",
+        "rev": "ebf65554b18ee053311f43e5faa5a3f36626c52e",
         "type": "github"
       },
       "original": {
         "owner": "NixOS",
-        "ref": "nixos-21.11",
+        "ref": "nixos-22.05",
         "repo": "nixpkgs",
         "type": "github"
       }
     },
     "root": {
       "inputs": {
-        "checkup": "checkup",
         "nixos-hardware": "nixos-hardware",
-        "nixpkgs": "nixpkgs_3"
-      }
-    },
-    "systemd-nix": {
-      "inputs": {
-        "nixpkgs": "nixpkgs_2"
-      },
-      "locked": {
-        "lastModified": 1608245516,
-        "narHash": "sha256-EoEit7oosSNXgIN2WZCb/e8ZbdBuC72eEj66CuLXYOI=",
-        "owner": "serokell",
-        "repo": "systemd-nix",
-        "rev": "61dd95a7a7a5f80ff9b1014f9e9e89bed6f84e2f",
-        "type": "github"
-      },
-      "original": {
-        "owner": "serokell",
-        "repo": "systemd-nix",
-        "type": "github"
+        "nixpkgs": "nixpkgs"
       }
     }
   },
