@@ -180,7 +180,7 @@ let dfree = pkgs.writeShellScriptBin "dfree" ''
   environment.systemPackages =
     with pkgs;
     [
-      wget vim pstree tree lsof rsync pciutils ripgrep fd dfree
+      wget vim pstree tree lsof rsync pciutils ripgrep fd dfree git
     ];
 
   # Some programs need SUID wrappers, can be configured further or are
