@@ -144,7 +144,7 @@ let dfree = pkgs.writeShellScriptBin "dfree" ''
 
   system.autoUpgrade.enable = true;
 
-  
+
   # Configure keymap in X11
   # services.xserver.layout = "us";
   # services.xserver.xkbOptions = "eurosign:e";
@@ -198,7 +198,7 @@ let dfree = pkgs.writeShellScriptBin "dfree" ''
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
   services.openssh.passwordAuthentication = false;
-  services.openssh.challengeResponseAuthentication = false;
+  services.openssh.kbdInteractiveAuthentication = false;
   services.openssh.permitRootLogin = "no";
   services.fail2ban.enable = true;
 
@@ -252,7 +252,7 @@ let dfree = pkgs.writeShellScriptBin "dfree" ''
       WebShare = share "/srv/samba/WebShare";
     };
   };
-  
+
   # AVAHI: Publish this server and its address on the network
   services.avahi = {
     enable = true;
@@ -306,7 +306,7 @@ let dfree = pkgs.writeShellScriptBin "dfree" ''
   };
   services.nginx.appendHttpConfig = "charset UTF-8;";
   security.acme.acceptTerms = true;
-  security.acme.email = "pyry.kontio@drasa.eu";
+  security.acme.defaults.email = "pyry.kontio@drasa.eu";
 
   services.vaultwarden = {
     enable = true;

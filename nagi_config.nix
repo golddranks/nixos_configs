@@ -81,7 +81,7 @@
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
   services.openssh.passwordAuthentication = false;
-  services.openssh.challengeResponseAuthentication = false;
+  services.openssh.kbdInteractiveAuthentication = false;
   services.openssh.permitRootLogin = "no";
 
   services.fail2ban.enable = true;
@@ -108,7 +108,7 @@
   };
 
   security.acme.acceptTerms = true;
-  security.acme.email = "pyry.kontio@drasa.eu";
+  security.acme.defaults.email = "pyry.kontio@drasa.eu";
 
   # Open ports in the firewall.
   networking.firewall.allowedTCPPorts = [ 80 443 ];
