@@ -19,7 +19,6 @@ let dfree = pkgs.writeShellScriptBin "dfree" ''
 {
   nix = {
     gc.automatic = true;
-    package = pkgs.nix_2_4;
   };
 
   imports =
