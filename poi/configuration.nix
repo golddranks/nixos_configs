@@ -98,7 +98,7 @@
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
   services.openssh.passwordAuthentication = false;
-  services.openssh.challengeResponseAuthentication = false;
+  services.openssh.kbdInteractiveAuthentication = false;
   services.openssh.permitRootLogin = "no";
   services.fail2ban.enable = true;
 
@@ -126,7 +126,7 @@
   };
   services.nginx.appendHttpConfig = "charset UTF-8;";
   security.acme.acceptTerms = true;
-  security.acme.email = "pyry.kontio@drasa.eu";
+  security.acme.defaults.email = "pyry.kontio@drasa.eu";
 
   # services.checkup = {
   #   enable = true;
