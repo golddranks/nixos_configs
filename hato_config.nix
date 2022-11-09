@@ -28,6 +28,7 @@
   security.sudo.extraConfig = ''
     Defaults        timestamp_timeout=45
   '';
+  security.acme.acceptTerms = true;
 
   networking.hostName = "hato"; # Define your hostname.
   # Pick only one of the below networking options.
