@@ -117,7 +117,7 @@
         default = true;
 
         locations."/.well-known/webfinger" = {
-          return = "301 https://mastodon.example.com$request_uri";
+          return = "301 https://social.ganba.re$request_uri";
         };
       };
       "social.ganba.re" = {
@@ -132,12 +132,12 @@
         };
 
         locations."@proxy" = {
-          proxyPass = (if cfg.enableUnixSocket then "http://unix:/run/mastodon-web/web.socket" else "http://127.0.0.1:55001}");
+          proxyPass = ("http://unix:/run/mastodon-web/web.socket");
           proxyWebsockets = true;
         };
 
         locations."/api/v1/streaming/" = {
-          proxyPass = (if cfg.enableUnixSocket then "http://unix:/run/mastodon-streaming/streaming.socket" else "http://127.0.0.1:55000/");
+          proxyPass = ("http://unix:/run/mastodon-streaming/streaming.socket");
           proxyWebsockets = true;
         };
       };
