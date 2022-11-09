@@ -153,6 +153,7 @@
     };
     smtp = {
       host = "smtp.mailgun.org";
+      port = 587;
       fromAddress = "mastodon@ganba.re";
       authenticate = true;
       user = "mastodon@ganba.re";
