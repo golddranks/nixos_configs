@@ -106,6 +106,44 @@
   services.openssh.permitRootLogin = "no";
   services.fail2ban.enable = true;
 
+  # NGINX
+  services.nginx = {
+    enable = true;
+    recommendedProxySettings = true;
+    virtualHosts = {
+      "ganba.re" = {
+        enableACME = true;
+        forceSSL = true;
+        default = true;
+
+        locations."/.well-known/webfinger" = {
+          return = "301 https://mastodon.example.com$request_uri";
+        };
+      };
+      "social.ganba.re" = {
+        enableACME = true;
+        forceSSL = true;
+        root = "${pkgs.mastodon}/public/";
+
+        locations."/system/".alias = "/var/lib/mastodon/public-system/";
+
+        locations."/" = {
+          tryFiles = "$uri @proxy";
+        };
+
+        locations."@proxy" = {
+          proxyPass = (if cfg.enableUnixSocket then "http://unix:/run/mastodon-web/web.socket" else "http://127.0.0.1:55001}");
+          proxyWebsockets = true;
+        };
+
+        locations."/api/v1/streaming/" = {
+          proxyPass = (if cfg.enableUnixSocket then "http://unix:/run/mastodon-streaming/streaming.socket" else "http://127.0.0.1:55000/");
+          proxyWebsockets = true;
+        };
+      };
+    };
+  };
+
   # MASTODON
   services.mastodon = {
     enable = true;
@@ -120,7 +158,6 @@
       user = "mastodon@ganba.re";
       passwordFile = "/home/kon/mailgun_smtp_mastodon_ganba_re_password.txt";
     };
-    configureNginx = true;
   };
 
   # Open ports in the firewall.
