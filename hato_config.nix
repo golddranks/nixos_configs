@@ -104,6 +104,23 @@
   services.openssh.permitRootLogin = "no";
   services.fail2ban.enable = true;
 
+  # MASTODON
+  services.mastodon = {
+    enable = true;
+    localDomain = "ganba.re";
+    extraConfig = {
+      WEB_DOMAIN = "social.ganba.re";
+    };
+    smtp = {
+      host = "smtp.mailgun.org";
+      fromAddress = "mastodon@ganba.re";
+      authenticate = true;
+      user = "mastodon@ganba.re";
+      passwordFile = "/home/kon/mailgun_smtp_mastodon_ganba_re_password.txt";
+    };
+    configureNginx = true;
+  };
+
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];
   # networking.firewall.allowedUDPPorts = [ ... ];
