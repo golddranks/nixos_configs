@@ -121,9 +121,9 @@
         };
       };
       "social.ganba.re" = {
-        enableACME = true;
-        forceSSL = true;
         root = "${pkgs.mastodon}/public/";
+        forceSSL = true;
+        enableACME = true;
 
         locations."/system/".alias = "/var/lib/mastodon/public-system/";
 
@@ -132,12 +132,12 @@
         };
 
         locations."@proxy" = {
-          proxyPass = ("http://unix:/run/mastodon-web/web.socket");
+          proxyPass = "http://unix:/run/mastodon-web/web.socket";
           proxyWebsockets = true;
         };
 
         locations."/api/v1/streaming/" = {
-          proxyPass = ("http://unix:/run/mastodon-streaming/streaming.socket");
+          proxyPass = "http://unix:/run/mastodon-streaming/streaming.socket";
           proxyWebsockets = true;
         };
       };
