@@ -156,7 +156,6 @@
       fromAddress = "mastodon@ganba.re";
       authenticate = true;
       user = "mastodon@ganba.re";
-      passwordFile = "/home/kon/mailgun_smtp_mastodon_ganba_re_password.txt";
     };
   };
 
