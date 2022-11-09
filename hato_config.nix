@@ -160,7 +160,7 @@
     };
   };
 
-  users.groups.mastodon.members = services.nginx.user;
+  users.groups.mastodon.members = "nginx";
 
   # Open ports in the firewall.
   networking.firewall.allowedTCPPorts = [ 80 443 ];
