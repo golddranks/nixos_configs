@@ -29,6 +29,7 @@
     Defaults        timestamp_timeout=45
   '';
   security.acme.acceptTerms = true;
+  security.acme.defaults.email = "pyry.kontio@drasa.eu";
 
   networking.hostName = "hato"; # Define your hostname.
   # Pick only one of the below networking options.
