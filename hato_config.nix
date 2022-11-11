@@ -115,6 +115,11 @@
         enableACME = true;
         forceSSL = true;
         default = true;
+        root = "/srv/nginx";
+
+        locations."/.well-known/host-meta" = {
+          proxyPass = "http://unix:/run/mastodon-web/web.socket";
+        };
 
         locations."/.well-known/webfinger" = {
           proxyPass = "http://unix:/run/mastodon-web/web.socket";
