@@ -117,7 +117,8 @@
         default = true;
 
         locations."/.well-known/webfinger" = {
-          return = "301 https://social.ganba.re$request_uri";
+          tryFiles = "@proxy";
+          #return = "301 https://social.ganba.re$request_uri";
         };
       };
       "social.ganba.re" = {
