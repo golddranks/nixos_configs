@@ -117,8 +117,8 @@
         default = true;
 
         locations."/.well-known/webfinger" = {
-          tryFiles = "@proxy";
-          #return = "301 https://social.ganba.re$request_uri";
+          proxyPass = "http://unix:/run/mastodon-web/web.socket";
+          proxyWebsockets = true;
         };
       };
       "social.ganba.re" = {
