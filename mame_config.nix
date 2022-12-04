@@ -325,8 +325,9 @@ let dfree = pkgs.writeShellScriptBin "dfree" ''
     archive = "archive_$(date +%Y-%m)"; # This is a literal
     days = "14";
     script = pkgs.writeShellScriptBin "archive.sh" ''
-      mkdir -p ${target}/${archive}
-      find ${target}/* -maxdepth 0 \! -path ./protected \! -name "archive_*" -exec mv {} /${archive}/ \;
+      cd ${target}
+      mkdir -p ${archive}
+      find * -maxdepth 0 \! -path ./protected \! -name "archive_*" -exec mv {} ${archive}/ \;
     '';
   in
   {
