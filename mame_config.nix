@@ -289,11 +289,14 @@ let dfree = pkgs.writeShellScriptBin "dfree" ''
     "webshare.drasa.eu" = {
       enableACME = true;
       forceSSL = true;
-      root = "/srv/www/webshare.drasa.eu";
       locations = {
-        "/".extraConfig = "autoindex on;";
+        "/" = {
+          root = "/srv/www/webshare.drasa.eu";
+          extraConfig = "autoindex on;";
+        };
         "/protected" = {
-          index = builtins.toFile "index.html" "This is a protected folder. A password is required, and the file index is not shown.";
+          root = "/srv/www/webshare.drasa.eu/protected";
+          index = "/home/kon/index.html"# builtins.toFile "index.html" "This is a protected folder. A password is required, and the file index is not shown.";
           basicAuthFile = "/var/lib/nginx/secrets/webshare.drasa.eu_protected_password";
         };
       };
