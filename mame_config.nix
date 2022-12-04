@@ -295,7 +295,7 @@ let dfree = pkgs.writeShellScriptBin "dfree" ''
           extraConfig = "autoindex on;";
         };
         "/protected/" ={
-          tryFiles = "$uri index.html";
+          tryFiles = "$uri /protected/index.html";
           basicAuthFile = "/var/lib/nginx/secrets/webshare.drasa.eu_protected_password";
         };
         "=/protected/index.html" =
