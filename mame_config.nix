@@ -331,7 +331,7 @@ let dfree = pkgs.writeShellScriptBin "dfree" ''
   in
   {
     enable = true;
-    systemCronJobs = [ "0 3 * * * root ${script}" ];
+    systemCronJobs = [ "0 3 * * * root ${script}/bin/archive.sh" ];
   };
 
   security.acme.acceptTerms = true;
