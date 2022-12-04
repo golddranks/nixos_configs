@@ -293,7 +293,7 @@ let dfree = pkgs.writeShellScriptBin "dfree" ''
       locations = {
         "/".extraConfig = "autoindex on;";
         "/protected" = {
-          index = "../../webshare.drasa.eu_protected_index.html";
+          index = builtins.toFile "index.html" "This is a protected folder. A password is required, and the file index is not shown.";
           basicAuthFile = "/var/lib/nginx/secrets/webshare.drasa.eu_protected_password";
         };
       };
