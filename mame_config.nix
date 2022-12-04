@@ -301,7 +301,7 @@ let dfree = pkgs.writeShellScriptBin "dfree" ''
           alias = index;
         };
         "/protected/" = {
-          tryFiles = "$uri";
+          tryFiles = "$uri /protected";
           basicAuthFile = "/var/lib/nginx/secrets/webshare.drasa.eu_protected_password";
         };
       };
