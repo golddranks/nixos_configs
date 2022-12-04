@@ -326,7 +326,7 @@ let dfree = pkgs.writeShellScriptBin "dfree" ''
     days = "14";
     script = pkgs.writeShellScriptBin "archive.sh" ''
       mkdir -p ${target}/${archive} && \
-      find ${target} -mtime +${days} -exec mv {} /${archive} \;
+      find ${target} -mtime +${days} -exec mv {} /${archive}/ \;
     '';
   in
   {
