@@ -290,7 +290,12 @@ let dfree = pkgs.writeShellScriptBin "dfree" ''
       enableACME = true;
       forceSSL = true;
       root = "/srv/www/webshare.drasa.eu";
-      locations."/".extraConfig = "autoindex on;";
+      locations {
+        "/".extraConfig = "autoindex on;";
+        "/protected" = {
+          basicAuthFile = "/var/lib/nginx/secrets/webshare.drasa.eu_protected_password";
+        };
+      };
     };
     "bitwarden.drasa.eu" = {
       enableACME = true;
