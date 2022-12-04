@@ -290,9 +290,10 @@ let dfree = pkgs.writeShellScriptBin "dfree" ''
       enableACME = true;
       forceSSL = true;
       root = "/srv/www/webshare.drasa.eu";
-      locations {
+      locations = {
         "/".extraConfig = "autoindex on;";
         "/protected" = {
+          index = "../../webshare.drasa.eu_protected_index.html";
           basicAuthFile = "/var/lib/nginx/secrets/webshare.drasa.eu_protected_password";
         };
       };
@@ -309,6 +310,22 @@ let dfree = pkgs.writeShellScriptBin "dfree" ''
     };
   };
   services.nginx.appendHttpConfig = "charset UTF-8;";
+
+  services.cron =
+  let
+    target = "/srv/www/webshare.drasa.eu";
+    archive = "archive_$(date +%Y-%m)"; # This is a literal
+    days = "14";
+    script = builtins.toFile "archive.sh" "
+      mkdir -p ${target}/${archive} && \
+      find ${target} -mtime +${days} -exec mv {} /${archive} \;
+    ";
+  in
+  {
+    enable = true;
+    systemCronJobs = [ "0 3 * * * root ${script}" ];
+  };
+
   security.acme.acceptTerms = true;
   security.acme.defaults.email = "pyry.kontio@drasa.eu";
 
