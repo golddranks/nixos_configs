@@ -163,6 +163,7 @@
       fromAddress = "mastodon@ganba.re";
       authenticate = true;
       user = "mastodon@ganba.re";
+      passwordFile = "/var/lib/mastodon/secrets/smtp-password";
     };
   };
 
