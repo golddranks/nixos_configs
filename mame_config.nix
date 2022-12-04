@@ -327,8 +327,8 @@ let dfree = pkgs.writeShellScriptBin "dfree" ''
       archive=archive/$(date +%Y-%m)
       cd "/srv/www/webshare.drasa.eu"
       mkdir -p $archive
-      find * -maxdepth 0 -mtime +14 \! -path ./protected \! -name "archive_*" -exec mv {} archive/ \;
-      find protected/*  -maxdepth 0 -mtime +14 \! -path ./protected \! -name "archive_*" -exec mv {} archive/protected/ \;
+      find * -maxdepth 0 -mtime +14 \! -path ./protected \! -name "archive_*" -exec mv {} $archive/ \;
+      find protected/*  -maxdepth 0 -mtime +14 \! -path ./protected \! -name "archive_*" -exec mv {} $archive/protected/ \;
     '';
   in
   {
