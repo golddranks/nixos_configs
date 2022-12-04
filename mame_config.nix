@@ -286,7 +286,10 @@ let dfree = pkgs.writeShellScriptBin "dfree" ''
       default = true;
       root = "/srv/www/mame.drasa.eu";
     };
-    "webshare.drasa.eu" = {
+    "webshare.drasa.eu" = let
+        protected = builtins.toFile "protected.html" "This is a protected folder. A password is required, and the file index is not shown.";
+        archive = builtins.toFile "archive.html" "This is an archive folder. The file index is not shown.";
+      in {
       root = "/srv/www/webshare.drasa.eu";
       enableACME = true;
       forceSSL = true;
@@ -294,16 +297,15 @@ let dfree = pkgs.writeShellScriptBin "dfree" ''
         "/" = {
           extraConfig = "autoindex on;";
         };
+        "/archive/" = {
+          tryFiles = "$uri /archive.html";
+        };
         "/protected/" = {
-          tryFiles = "$uri /protected/warning.html";
+          tryFiles = "$uri /warning.html";
           basicAuthFile = "/var/lib/nginx/secrets/webshare.drasa.eu_protected_password";
         };
-        "=/protected/warning.html" =
-        let
-          warning = builtins.toFile "warning.html" "This is a protected folder. A password is required, and the file index is not shown.";
-        in {
-          alias = warning;
-        };
+        "=/protected.html".alias = protected;
+        "=/archive.html".alias = archive;
       };
     };
     "bitwarden.drasa.eu" = {
@@ -322,7 +324,7 @@ let dfree = pkgs.writeShellScriptBin "dfree" ''
   services.cron =
   let
     target = "/srv/www/webshare.drasa.eu";
-    archive = "archive_$(date +%Y-%m)"; # This is a literal
+    archive = "archive/$(date +%Y-%m)"; # This is a literal
     days = "14";
     script = pkgs.writeShellScriptBin "archive.sh" ''
       cd ${target}
