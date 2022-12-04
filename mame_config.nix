@@ -298,7 +298,7 @@ let dfree = pkgs.writeShellScriptBin "dfree" ''
         let
           index = builtins.toFile "index.html" "This is a protected folder. A password is required, and the file index is not shown.";
         in {
-          tryFiles = "${index} $uri =404";
+          tryFiles = "${index} $uri $uri/ =404";
           basicAuthFile = "/var/lib/nginx/secrets/webshare.drasa.eu_protected_password";
         };
       };
