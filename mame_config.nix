@@ -324,10 +324,10 @@ let dfree = pkgs.writeShellScriptBin "dfree" ''
     target = "/srv/www/webshare.drasa.eu";
     archive = "archive_$(date +%Y-%m)"; # This is a literal
     days = "14";
-    script = builtins.toFile "archive.sh" "
+    script = pkgs.writeShellScriptBin "archive.sh" ''
       mkdir -p ${target}/${archive} && \
       find ${target} -mtime +${days} -exec mv {} /${archive} \;
-    ";
+    '';
   in
   {
     enable = true;
