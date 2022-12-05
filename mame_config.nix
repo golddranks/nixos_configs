@@ -300,6 +300,10 @@ let dfree = pkgs.writeShellScriptBin "dfree" ''
         "/archive/" = {
           tryFiles = "$uri /archive.html";
         };
+        "/archive/protected" = {
+          tryFiles = "$uri /protected.html";
+          basicAuthFile = "/var/lib/nginx/secrets/webshare.drasa.eu_protected_password";
+        };
         "/protected/" = {
           tryFiles = "$uri /protected.html";
           basicAuthFile = "/var/lib/nginx/secrets/webshare.drasa.eu_protected_password";
@@ -324,11 +328,12 @@ let dfree = pkgs.writeShellScriptBin "dfree" ''
   services.cron =
   let
     script = pkgs.writeShellScriptBin "archive.sh" ''
-      archive=archive/$(date +%Y-%m)
+      year=$(date +%Y)
       cd "/srv/www/webshare.drasa.eu"
-      mkdir -p $archive/protected
-      find * -maxdepth 0 -mtime +14 \! -path ./protected \! -name "archive_*" -exec mv {} $archive/ \;
-      find protected/*  -maxdepth 0 -mtime +14 \! -path ./protected \! -name "archive_*" -exec mv {} $archive/protected/ \;
+      mkdir -p archive/$year
+      mkdir -p archive/protected/$year
+      find * -maxdepth 0 -mtime +14 \! -path protected \! -path archive -exec mv {} archive/$year/ \;
+      find protected/* -maxdepth 0 -mtime +14 \! -path protected \! -path archive -exec mv {} archive/protected/$year/ \;
     '';
   in
   {
