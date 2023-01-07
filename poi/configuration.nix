@@ -54,7 +54,11 @@
   console.keyMap = "us";
 
 
-  system.autoUpgrade.enable = true;
+  system.autoUpgrade = {
+    enable = true;
+    flake = "/home/kon/nixos_configs/poi/";
+    flags = [ "--update-input" "nixpkgs" "--commit-lock-file" ];
+  };
 
 
   # Configure keymap in X11
