@@ -209,6 +209,7 @@ let dfree = pkgs.writeShellScriptBin "dfree" ''
     enable = true;
     securityType = "user";
     extraConfig = ''
+      max open files = 131072
       dfree command = "'' + dfree + ''/bin/dfree"
       server min protocol = SMB3_00
       vfs objects = fruit streams_xattr
@@ -253,7 +254,7 @@ let dfree = pkgs.writeShellScriptBin "dfree" ''
   };
 
   # samba open file ulimit (the default is 16384, which sometimes isn't enough)
-  systemd.services.samba-smbd.serviceConfig.LimitNOFILE = 32768;
+  #systemd.services.samba-smbd.serviceConfig.LimitNOFILE = 131072;
 
   # AVAHI: Publish this server and its address on the network
   services.avahi = {
