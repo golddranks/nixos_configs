@@ -252,6 +252,9 @@ let dfree = pkgs.writeShellScriptBin "dfree" ''
     };
   };
 
+  # samba open file ulimit (the default is 16384, which sometimes isn't enough)
+  systemd.services.samba-smbd.serviceConfig.LimitNOFILE = 32768;
+
   # AVAHI: Publish this server and its address on the network
   services.avahi = {
     enable = true;
