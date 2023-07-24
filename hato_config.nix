@@ -96,9 +96,9 @@
 
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
-  services.openssh.settings.passwordAuthentication = false;
-  services.openssh.settings.kbdInteractiveAuthentication = false;
-  services.openssh.settings.permitRootLogin = "no";
+  services.openssh.settings.PasswordAuthentication = false;
+  services.openssh.settings.KbdInteractiveAuthentication = false;
+  services.openssh.settings.PermitRootLogin = "no";
   services.fail2ban.enable = true;
 
   # NGINX
