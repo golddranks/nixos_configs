@@ -104,9 +104,9 @@
 
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
-  services.openssh.passwordAuthentication = false;
-  services.openssh.kbdInteractiveAuthentication = false;
-  services.openssh.permitRootLogin = "no";
+  services.openssh.settings.passwordAuthentication = false;
+  services.openssh.settings.kbdInteractiveAuthentication = false;
+  services.openssh.settings.permitRootLogin = "no";
   services.fail2ban.enable = true;
 
   # AVAHI: Publish this server and its address on the network

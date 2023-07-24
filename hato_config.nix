@@ -17,16 +17,8 @@
       /etc/nixos/hardware-configuration.nix
     ];
 
-  # Use the GRUB 2 boot loader.
   boot.loader.grub.enable = true;
-  boot.loader.grub.version = 2;
   boot.loader.grub.device = "/dev/sda";
-
-  # boot.loader.grub.efiSupport = true;
-  # boot.loader.grub.efiInstallAsRemovable = true;
-  # boot.loader.efi.efiSysMountPoint = "/boot/efi";
-  # Define on which hard drive you want to install Grub.
-  # boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
 
   security.sudo.extraConfig = ''
     Defaults        timestamp_timeout=45
@@ -104,9 +96,9 @@
 
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
-  services.openssh.passwordAuthentication = false;
-  services.openssh.kbdInteractiveAuthentication = false;
-  services.openssh.permitRootLogin = "no";
+  services.openssh.settings.passwordAuthentication = false;
+  services.openssh.settings.kbdInteractiveAuthentication = false;
+  services.openssh.settings.permitRootLogin = "no";
   services.fail2ban.enable = true;
 
   # NGINX
