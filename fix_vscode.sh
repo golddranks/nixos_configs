@@ -1,6 +1,6 @@
 #!/bin/sh
 
-nix-env -iA nixos.nodejs-14_x
+nix profile install nixpkgs#nodejs
 for DIR in $HOME/.vscode-server/bin/*; do
     cd $DIR
     rm -f node
