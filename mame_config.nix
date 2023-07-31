@@ -144,10 +144,6 @@ let dfree = pkgs.writeShellScriptBin "dfree" ''
   console.keyMap = "us";
 
   system.autoUpgrade.enable = true;
-  services.cron = {
-    enable = true;
-    systemCronJobs = ["17 4 * * * kon git -C /home/kon/nixos_configs pull origin main"];
-  };
 
   # Configure keymap in X11
   # services.xserver.layout = "us";
@@ -347,7 +343,10 @@ let dfree = pkgs.writeShellScriptBin "dfree" ''
   in
   {
     enable = true;
-    systemCronJobs = [ "0 3 * * * root ${script}/bin/archive.sh" ];
+    systemCronJobs = [
+      "0 3 * * * root ${script}/bin/archive.sh"
+      "17 4 * * * kon git -C /home/kon/nixos_configs pull origin main"
+      ];
   };
 
   security.acme.acceptTerms = true;
