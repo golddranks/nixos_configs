@@ -62,6 +62,10 @@
     flake = "/home/kon/nixos_configs/poi/";
     flags = [ "--update-input" "nixpkgs" "--commit-lock-file" ];
   };
+  services.cron = {
+    enable = true;
+    systemCronJobs = ["17 4 * * * kon git -C /home/kon/nixos_configs pull origin main"];
+  };
 
 
   # Configure keymap in X11
