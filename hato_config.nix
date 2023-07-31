@@ -5,6 +5,7 @@
 { config, pkgs, ... }:
 
 {
+
   nix = {
     gc = {
       automatic = true;
@@ -44,6 +45,10 @@
   console.keyMap = "us";
 
   system.autoUpgrade.enable = true;
+  services.cron = {
+    enable = true;
+    systemCronJobs = ["17 4 * * * kon git -C /home/kon/nixos_configs pull origin main"];
+  };
 
   # Enable the X11 windowing system.
   # services.xserver.enable = true;
@@ -120,6 +125,11 @@
           proxyPass = "http://unix:/run/mastodon-web/web.socket";
           proxyWebsockets = true;
         };
+      };
+      "japania.ganba.re" = {
+        enableACME = true;
+        forceSSL = true;
+        root = "/srv/japania.ganba.re";
       };
       "social.ganba.re" = {
         root = "${pkgs.mastodon}/public/";
