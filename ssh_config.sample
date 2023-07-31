@@ -1,0 +1,5 @@
+Host nix_deploy
+    User	git
+    Hostname	github.com
+    IdentitiesOnly yes
+    IdentityFile ~/.ssh/nix_deploy

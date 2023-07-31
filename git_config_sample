@@ -1,0 +1,4 @@
+[remote "origin"]
+        url = git@nix_deploy:golddranks/nixos_configs.git
+        pushurl = git@github.com:golddranks/nixos_configs.git
+        fetch = +refs/heads/*:refs/remotes/origin/*
