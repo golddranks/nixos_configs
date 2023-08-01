@@ -366,16 +366,16 @@ let dfree = pkgs.writeShellScriptBin "dfree" ''
     config = {
       DOMAIN = "https://bitwarden.drasa.eu:8080";
       SIGNUPS_ALLOWED = true;
-      SIGNUPS_VERIFY=true
+      SIGNUPS_VERIFY = true;
       ROCKET_PORT = 8080;
       ROCKET_LOG = "critical";
-      SMTP_HOST = "smtp.mailgun.org";
-      SMTP_PORT = 587;
+      SMTP_HOST = "smtp.eu.mailgun.org";
+      SMTP_PORT = 465;
       SMTP_SSL = false;
       SMTP_FROM = "postmaster@bitwarden.drasa.eu";
       SMTP_FROM_NAME = "drasa.eu Bitwarden server";
       SMTP_SECURITY = "force_tls";
-      SMTP_USERNAME = "postmaster@bitwarden.drasa.eu"
+      SMTP_USERNAME = "postmaster@bitwarden.drasa.eu";
     };
     environmentFile = "/var/lib/bitwarden_rs/secrets.env";
   };
