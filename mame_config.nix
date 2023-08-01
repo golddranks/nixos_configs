@@ -184,6 +184,9 @@ let dfree = pkgs.writeShellScriptBin "dfree" ''
       wget vim pstree tree lsof rsync pciutils ripgrep fd dfree git
     ];
 
+  # To make VS Code (SSH remote) work
+  programs.nix-ld.enable = true;
+
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
   # programs.mtr.enable = true;
@@ -200,6 +203,11 @@ let dfree = pkgs.writeShellScriptBin "dfree" ''
   services.openssh.settings.PasswordAuthentication = false;
   services.openssh.settings.KbdInteractiveAuthentication = false;
   services.openssh.settings.PermitRootLogin = "no";
+
+  # To make VS Code with nix-ld work
+  services.openssh.extraConfig = ''
+    AcceptEnv is_vscode
+  '';
   services.fail2ban.enable = true;
 
   # Enable Windows 10 to find the samba shares:
