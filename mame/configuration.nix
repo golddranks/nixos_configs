@@ -3,7 +3,6 @@
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
 { config, pkgs, ... }:
-
 let
   dfree_script = pkgs.writeShellScriptBin "dfree" ''
   # The MacOS and Windows SMB clients just check the free space of the root folder, whith doesn't take into account
@@ -25,11 +24,6 @@ let
     find * -maxdepth 0 -mtime +14 \! -path protected \! -path archive -exec mv {} archive/$year/ \;
     find protected/* -maxdepth 0 -mtime +14 \! -path protected \! -path archive -exec mv {} archive/protected/$year/ \;
   '';
-  pull_nix_config_script = ''
-    git -C /home/kon/nixos_configs fetch origin main
-    git -C /home/kon/nixos_configs rebase origin/main main || \
-      git -C /home/kon/nixos_configs rebase --abort
-  '';
 in {
   nix = {
     gc = {
@@ -41,6 +35,7 @@ in {
   imports =
     [ # Include the results of the hardware scan.
       /etc/nixos/hardware-configuration.nix
+      ../common.nix
     ];
 
   boot.loader.systemd-boot.enable = true;
@@ -353,10 +348,6 @@ in {
   services.nginx.appendHttpConfig = "charset UTF-8;";
 
   systemd.services.archive_webshare.script = "${archive_script}/bin/archive.sh";
-  systemd.services.pull_nix_config = {
-    serviceConfig.User = "kon";
-    script = "${pull_nix_config_script}/bin/pull.sh";
-  };
   systemd.timers = {
       archive_webshare = {
         wantedBy = [ "timers.target" ];
