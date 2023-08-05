@@ -75,7 +75,7 @@
     kon = {
       isNormalUser = true;
       description = "Pyry Kontio";
-      extraGroups = [ "wheel" "networkmanager" "docker" ];
+      extraGroups = [ "wheel" "networkmanager" ];
     };
   };
 

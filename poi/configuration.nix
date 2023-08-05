@@ -226,9 +226,6 @@
   services.iperf3.enable = true;
   services.iperf3.openFirewall = true;
 
-  # DOCKER
-  virtualisation.docker.enable = true;
-
   # Open ports in the firewall.
   networking.firewall.allowedTCPPorts = [ 80 443 3000 ];
   # networking.firewall.allowedUDPPorts = [ ... ];

@@ -129,10 +129,10 @@ let dfree = pkgs.writeShellScriptBin "dfree" ''
   networking.interfaces.eno1.tempAddress = "disabled";
 
   # Enable RA for IPv6 tokens to work
-  services.udev.extraRules = "
+  services.udev.extraRules = ''
     ACTION==\"add\", SUBSYSTEM==\"net\", RUN+=\"${pkgs.procps}/bin/sysctl net.ipv6.conf.eno1.accept_ra=1\"
     ACTION==\"add\", SUBSYSTEM==\"net\", RUN+=\"${pkgs.iproute}/bin/ip token set '::10' dev eno1\"
-    ";
+  '';
 
   # Configure network proxy if necessary
   # networking.proxy.default = "http://user:password@proxy:port/";
@@ -164,7 +164,7 @@ let dfree = pkgs.writeShellScriptBin "dfree" ''
     kon = {
       isNormalUser = true;
       description = "Pyry Kontio";
-      extraGroups = [ "wheel" "networkmanager" "docker" ];
+      extraGroups = [ "wheel" "networkmanager" ];
     };
     samba = {
       description = "Samba";
@@ -392,9 +392,6 @@ let dfree = pkgs.writeShellScriptBin "dfree" ''
 
   services.iperf3.enable = true;
   services.iperf3.openFirewall = true;
-
-  # DOCKER
-  virtualisation.docker.enable = true;
 
   # Open ports in the firewall.
   # 445, 139, 137, 138: samba, netbios names
