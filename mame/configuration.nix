@@ -277,17 +277,10 @@ in {
   services.nginx.appendHttpConfig = "charset UTF-8;";
 
   systemd.services.archive_webshare.script = "${archive_script}/bin/archive.sh";
-  systemd.timers = {
-      archive_webshare = {
-        wantedBy = [ "timers.target" ];
-        timerConfig.OnCalendar = "*-*-* 3:00";
-        timerConfig.Unit = "archive_webshare.service";
-      };
-      pull_nix_config = {
-        wantedBy = [ "timers.target" ];
-        timerConfig.OnCalendar = "*-*-* 4:17";
-        timerConfig.Unit = "pull_nix_config.service";
-      };
+  systemd.timers.archive_webshare = {
+    wantedBy = [ "timers.target" ];
+    timerConfig.OnCalendar = "*-*-* 3:00";
+    timerConfig.Unit = "archive_webshare.service";
   };
 
   services.vaultwarden = {

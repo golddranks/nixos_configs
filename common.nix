@@ -43,6 +43,11 @@ in {
     serviceConfig.User = "kon";
     script = pull_nix_config_script;
   };
+  systemd.timers.pull_nix_config = {
+    wantedBy = [ "timers.target" ];
+    timerConfig.OnCalendar = "*-*-* 4:17";
+    timerConfig.Unit = "pull_nix_config.service";
+  };
 
   environment.systemPackages =
     with pkgs;
