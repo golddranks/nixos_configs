@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ pkgs, ... }:
 let
   pull_nix_config_script = ''
     git -C /home/kon/nixos_configs fetch origin main
@@ -7,7 +7,8 @@ let
   '';
 in {
   systemd.services.pull_nix_config = {
+    path = [ pkgs.git pkgs.openssh ];
     serviceConfig.User = "kon";
-    script = "${pull_nix_config_script}/bin/pull.sh";
+    script = pull_nix_config_script;
   };
 }
