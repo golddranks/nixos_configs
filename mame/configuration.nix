@@ -349,7 +349,10 @@ let dfree = pkgs.writeShellScriptBin "dfree" ''
         find protected/* -maxdepth 0 -mtime +14 \! -path protected \! -path archive -exec mv {} archive/protected/$year/ \;
       '';
     in "${script}/bin/archive.sh";
-  systemd.services.pull_nix_config.script = "git -C /home/kon/nixos_configs pull origin main";
+  systemd.services.pull_nix_config = {
+    serviceConfig.User = "kon";
+    script = "git -C /home/kon/nixos_configs fetch origin main";
+  };
   systemd.timers = {
       archive_webshare = {
         wantedBy = [ "timers.target" ];
