@@ -3,8 +3,8 @@
 {
   imports =
     [
-      ./hardware-configuration.nix
       ../common.nix
+      ./hardware-configuration.nix
     ];
 
   networking.hostName = "poi";
