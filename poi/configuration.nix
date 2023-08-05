@@ -1,34 +1,15 @@
-# Edit this configuration file to define what should be installed on
-# your system.  Help is available in the configuration.nix(5) man page
-# and in the NixOS manual (accessible by running ‘nixos-help’).
-
 { config, pkgs, ... }:
 
 {
-
-  nix = {
-    gc = {
-      automatic = true;
-      options = "--delete-older-than 30d";
-    };
-    extraOptions = ''
-      experimental-features = nix-command flakes
-    '';
-  };
-
   imports =
-    [ # Include the results of the hardware scan.
+    [
       ./hardware-configuration.nix
+      ../common.nix
     ];
 
-  networking.hostName = "poi"; # Define your hostname.
+  networking.hostName = "poi";
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
-  security.sudo.extraConfig = ''
-    Defaults        timestamp_timeout=45
-  '';
-
-  # Set your time zone.
   time.timeZone = "Asia/Tokyo";
 
   # The global useDHCP flag is deprecated, therefore explicitly set to false here.
@@ -47,40 +28,11 @@
     ACTION==\"add\", SUBSYSTEM==\"net\", RUN+=\"${pkgs.iproute2}/bin/ip token set '::20' dev eth0\"
     ";
 
-  # Configure network proxy if necessary
-  # networking.proxy.default = "http://user:password@proxy:port/";
-  # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
-
-  # Select internationalisation properties.
-  i18n.defaultLocale = "en_DK.UTF-8";
-  console.font = "Lat2-Terminus16";
-  console.keyMap = "us";
-
-
   system.autoUpgrade = {
     enable = true;
     flake = "/home/kon/nixos_configs/poi/";
     flags = [ "--update-input" "nixpkgs" "--commit-lock-file" ];
   };
-  services.cron = {
-    enable = true;
-    systemCronJobs = ["17 4 * * * kon git -C /home/kon/nixos_configs pull origin main"];
-  };
-
-
-  # Configure keymap in X11
-  # services.xserver.layout = "us";
-  # services.xserver.xkbOptions = "eurosign:e";
-
-  # Enable CUPS to print documents.
-  # services.printing.enable = true;
-
-  # Enable sound.
-  # sound.enable = true;
-  # hardware.pulseaudio.enable = true;
-
-  # Enable touchpad support (enabled default in most desktopManager).
-  # services.xserver.libinput.enable = true;
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.kon = {
@@ -88,30 +40,6 @@
     description = "Pyry Kontio";
     extraGroups = [ "wheel" "networkmanager" ];
   };
-
-  # List packages installed in system profile. To search, run:
-  # $ nix search wget
-  environment.systemPackages = with pkgs; [
-    wget vim pstree tree lsof rsync pciutils ripgrep fd git
-  ];
-
-  # Some programs need SUID wrappers, can be configured further or are
-  # started in user sessions.
-  # programs.mtr.enable = true;
-  programs.gnupg.agent = {
-    enable = true;
-    enableSSHSupport = true;
-    pinentryFlavor = "curses";
-  };
-
-  # List services that you want to enable:
-
-  # Enable the OpenSSH daemon.
-  services.openssh.enable = true;
-  services.openssh.settings.PasswordAuthentication = false;
-  services.openssh.settings.KbdInteractiveAuthentication = false;
-  services.openssh.settings.PermitRootLogin = "no";
-  services.fail2ban.enable = true;
 
   # AVAHI: Publish this server and its address on the network
   services.avahi = {
@@ -136,8 +64,6 @@
       root = "/srv/www/poi.drasa.eu";
   };
   services.nginx.appendHttpConfig = "charset UTF-8;";
-  security.acme.acceptTerms = true;
-  security.acme.defaults.email = "pyry.kontio@drasa.eu";
 
   # services.checkup = {
   #   enable = true;
@@ -223,6 +149,7 @@
   # users.users.checkup.group = "checkup";
   # users.groups.checkup = {};
 
+  # iperf3 is a network throughput tester
   services.iperf3.enable = true;
   services.iperf3.openFirewall = true;
 
