@@ -4,7 +4,8 @@
 
 { config, pkgs, ... }:
 
-let dfree = pkgs.writeShellScriptBin "dfree" ''
+let
+  dfree_script = pkgs.writeShellScriptBin "dfree" ''
   # The MacOS and Windows SMB clients just check the free space of the root folder, whith doesn't take into account
   # the free space in the mounted folders inside, so we are manually calculating the free space as the sum of those.
   if [ "$1" = '.' -a "$(pwd)" = "/srv/samba/Filesaari" ]; then
@@ -15,8 +16,21 @@ let dfree = pkgs.writeShellScriptBin "dfree" ''
   else
     ${pkgs.coreutils}/bin/df "$1" | ${pkgs.coreutils}/bin/tail -1 | ${pkgs.gawk}/bin/awk '{print $2" "$4}'
   fi
-''; in
-{
+'';
+  archive_script = pkgs.writeShellScriptBin "archive.sh" ''
+    year=$(date +%Y)
+    cd "/srv/www/webshare.drasa.eu"
+    mkdir -p archive/$year
+    mkdir -p archive/protected/$year
+    find * -maxdepth 0 -mtime +14 \! -path protected \! -path archive -exec mv {} archive/$year/ \;
+    find protected/* -maxdepth 0 -mtime +14 \! -path protected \! -path archive -exec mv {} archive/protected/$year/ \;
+  '';
+  pull_nix_config_script = ''
+    git -C /home/kon/nixos_configs fetch origin main
+    git -C /home/kon/nixos_configs rebase origin/main main || \
+      git -C /home/kon/nixos_configs rebase --abort
+  '';
+in {
   nix = {
     gc = {
       automatic = true;
@@ -219,7 +233,7 @@ let dfree = pkgs.writeShellScriptBin "dfree" ''
     securityType = "user";
     extraConfig = ''
       max open files = 131072
-      dfree command = "'' + dfree + ''/bin/dfree"
+      dfree command = ${dfree_script}/bin/dfree"
       server min protocol = SMB3_00
       vfs objects = fruit streams_xattr
       fruit:metadata = stream
@@ -338,20 +352,10 @@ let dfree = pkgs.writeShellScriptBin "dfree" ''
   };
   services.nginx.appendHttpConfig = "charset UTF-8;";
 
-  systemd.services.archive_webshare.script =
-    let
-      script = pkgs.writeShellScriptBin "archive.sh" ''
-        year=$(date +%Y)
-        cd "/srv/www/webshare.drasa.eu"
-        mkdir -p archive/$year
-        mkdir -p archive/protected/$year
-        find * -maxdepth 0 -mtime +14 \! -path protected \! -path archive -exec mv {} archive/$year/ \;
-        find protected/* -maxdepth 0 -mtime +14 \! -path protected \! -path archive -exec mv {} archive/protected/$year/ \;
-      '';
-    in "${script}/bin/archive.sh";
+  systemd.services.archive_webshare.script = "${archive_script}/bin/archive.sh";
   systemd.services.pull_nix_config = {
     serviceConfig.User = "kon";
-    script = "git -C /home/kon/nixos_configs fetch origin main";
+    script = "${pull_nix_config_script}/bin/pull.sh";
   };
   systemd.timers = {
       archive_webshare = {
