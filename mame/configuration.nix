@@ -338,23 +338,29 @@ let dfree = pkgs.writeShellScriptBin "dfree" ''
   };
   services.nginx.appendHttpConfig = "charset UTF-8;";
 
-  services.cron =
-  let
-    script = pkgs.writeShellScriptBin "archive.sh" ''
-      year=$(date +%Y)
-      cd "/srv/www/webshare.drasa.eu"
-      mkdir -p archive/$year
-      mkdir -p archive/protected/$year
-      find * -maxdepth 0 -mtime +14 \! -path protected \! -path archive -exec mv {} archive/$year/ \;
-      find protected/* -maxdepth 0 -mtime +14 \! -path protected \! -path archive -exec mv {} archive/protected/$year/ \;
-    '';
-  in
-  {
-    enable = true;
-    systemCronJobs = [
-      "0 3 * * * root ${script}/bin/archive.sh"
-      "17 4 * * * kon git -C /home/kon/nixos_configs pull origin main"
-      ];
+  systemd.services.archive_webshare.script =
+    let
+      script = pkgs.writeShellScriptBin "archive.sh" ''
+        year=$(date +%Y)
+        cd "/srv/www/webshare.drasa.eu"
+        mkdir -p archive/$year
+        mkdir -p archive/protected/$year
+        find * -maxdepth 0 -mtime +14 \! -path protected \! -path archive -exec mv {} archive/$year/ \;
+        find protected/* -maxdepth 0 -mtime +14 \! -path protected \! -path archive -exec mv {} archive/protected/$year/ \;
+      '';
+    in "${script}/bin/archive.sh";
+  systemd.services.pull_nix_config.script = "git -C /home/kon/nixos_configs pull origin main";
+  systemd.timers = {
+      archive_webshare = {
+        wantedBy = [ "timers.target" ];
+        timerConfig.OnCalendar = "*-*-* 3:00";
+        timerConfig.Unit = "archive_webshare.service";
+      };
+      pull_nix_config = {
+        wantedBy = [ "timers.target" ];
+        timerConfig.OnCalendar = "*-*-* 4:17";
+        timerConfig.Unit = "pull_nix_config.service";
+      };
   };
 
   security.acme.acceptTerms = true;
