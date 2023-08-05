@@ -1,10 +1,9 @@
-{ config, pkgs, ... }:
+{ config, pkgs }:
 
 {
   imports =
     [
       ./hardware-configuration.nix
-      ../common.nix
     ];
 
   networking.hostName = "poi";

@@ -4,7 +4,7 @@
   imports =
     [
       /etc/nixos/hardware-configuration.nix
-      ../common.nix
+      ../common/configuration.nix
     ];
 
   networking.hostName = "hato";
