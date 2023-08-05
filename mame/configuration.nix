@@ -190,7 +190,7 @@ in {
   environment.systemPackages =
     with pkgs;
     [
-      wget vim pstree tree lsof rsync pciutils ripgrep fd dfree git
+      wget vim pstree tree lsof rsync pciutils ripgrep fd git
     ];
 
   # To make VS Code (SSH remote) work
