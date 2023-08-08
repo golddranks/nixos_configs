@@ -217,9 +217,19 @@
       X11Forwarding no
       AuthorizedKeysFile /chroot/dropbox_authorized_keys
       Banner /chroot/dropbox_banner.txt
+
+    AcceptEnv is_vscode
   '';
   # setting passwordAuthentication to false disables PAM's Unix auth,
   # which prevents the dropbox special case; we force PAM to allow Unix auth
   security.pam.services.sshd.unixAuth = pkgs.lib.mkForce true;
+
+
+  # To make VS Code (SSH remote) work
+  programs.nix-ld.enable = true;
+  # defined above
+  #services.openssh.extraConfig = ''
+  #  AcceptEnv is_vscode
+  #'';
 }
 
