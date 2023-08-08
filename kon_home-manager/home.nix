@@ -18,7 +18,7 @@
 
   systemd.user.services.killall_vscode_node = {
     Unit.Description = "Kill all CPU hog remote VS Code node processes at night";
-    Service.ExecStart = "/home/kon/.nix-profile/bin/killall node";
+    Service.ExecStart = "/bin/sh -c '/home/kon/.nix-profile/bin/killall node || true'";
   };
   systemd.user.timers.killall_vscode_node = {
     Timer.OnCalendar = "*-*-* 3,4,5:30";
