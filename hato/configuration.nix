@@ -114,4 +114,9 @@
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "22.11"; # Did you read the comment?
 
+  # To make VS Code (SSH remote) work
+  programs.nix-ld.enable = true;
+  services.openssh.extraConfig = ''
+    AcceptEnv is_vscode
+  '';
 }
