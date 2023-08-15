@@ -97,9 +97,23 @@
 
   # Open ports in the firewall.
   networking.firewall.allowedTCPPorts = [ 80 443 ];
-  # networking.firewall.allowedUDPPorts = [ ... ];
+  networking.firewall.allowedUDPPorts = [ 51820 ];
   # Or disable the firewall altogether.
   # networking.firewall.enable = false;
+
+  networking.wireguard.interfaces.wg0 = {
+    ips = [ "10.0.99.16/32" ];
+    listenPort = 51820;
+    privateKeyFile = "/home/kon/wg_privatekey";
+    peers = [{
+      name = "mon";
+      publicKey = "9hQCYRWb+5tpcee3oLK/J+wFuAZpUo5KSFkxzAGQ4R0=";
+      presharedKeyFile = "/home/kon/wg_drasa.eu_presharedkey";
+      allowedIPs = [ "10.0.0.0/16" ];
+      endpoint = "drasa.eu:51820";
+      persistentKeepalive = 25;
+    }];
+  };
 
   # Copy the NixOS configuration file and link it from the resulting system
   # (/run/current-system/configuration.nix). This is useful in case you
