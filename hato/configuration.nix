@@ -102,14 +102,14 @@
   # networking.firewall.enable = false;
 
   networking.wireguard.interfaces.wg0 = {
-    ips = [ "10.0.99.16/32" ];
+    ips = [ "10.0.99.16/32" "2404:7a80:9621:7100::9999:16/128" ];
     listenPort = 51820;
     privateKeyFile = "/home/kon/wg_privatekey";
     peers = [{
       name = "mon";
       publicKey = "9hQCYRWb+5tpcee3oLK/J+wFuAZpUo5KSFkxzAGQ4R0=";
       presharedKeyFile = "/home/kon/wg_drasa.eu_presharedkey";
-      allowedIPs = [ "10.0.0.0/16" ];
+      allowedIPs = [ "10.0.0.0/16" "2404:7a80:9621:7100::9999:0/112" ];
       endpoint = "drasa.eu:51820";
       persistentKeepalive = 25;
     }];
