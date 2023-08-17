@@ -52,7 +52,7 @@ in {
   environment.systemPackages =
     with pkgs;
     [
-      wget vim pstree tree lsof rsync pciutils ripgrep fd git
+      wget vim pstree tree lsof rsync pciutils ripgrep fd git socat dig tcpdump
     ];
 
   security.acme.acceptTerms = true;
