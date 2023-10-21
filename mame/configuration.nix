@@ -118,12 +118,12 @@ in {
   networking.useDHCP = false;
   networking.interfaces.eno1.useDHCP = true;
   # Disable IPv6 privacy protection because this is a server and we want a static-ish address
-  networking.interfaces.eno1.tempAddress = "disabled";
+  networking.tempAddresses = "disabled";
+  networking.dhcpcd.extraConfig = "ipv4only"; # After dhcpcd updates to v10 we can use slaac token, but before that, disable ipv6
 
-  # Enable RA for IPv6 tokens to work
+  # Remove this after dhcpcd v10
   services.udev.extraRules = ''
-    ACTION==\"add\", SUBSYSTEM==\"net\", RUN+=\"${pkgs.procps}/bin/sysctl net.ipv6.conf.eno1.accept_ra=1\"
-    ACTION==\"add\", SUBSYSTEM==\"net\", RUN+=\"${pkgs.iproute}/bin/ip token set '::10' dev eno1\"
+    ACTION=="add", SUBSYSTEM=="net", NAME=="eno1", RUN+="${pkgs.iproute}/bin/ip token set '::10' dev eno1"
   '';
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
@@ -287,7 +287,7 @@ in {
     enable = true;
     backupDir = "/srv/bitwarden-backup";
     config = {
-      DOMAIN = "https://bitwarden.drasa.eu:8080";
+      DOMAIN = "https://bitwarden.drasa.eu";
       SIGNUPS_ALLOWED = true;
       SIGNUPS_VERIFY = true;
       ROCKET_PORT = 8080;
