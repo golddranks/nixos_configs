@@ -19,14 +19,13 @@
   networking.interfaces.eth0.useDHCP = true;
   networking.interfaces.wlan0.useDHCP = true;
   # Disable IPv6 privacy protection because this is a server and we want a static-ish address
-  networking.interfaces.eth0.tempAddress = "disabled";
-  networking.interfaces.wlan0.tempAddress = "disabled";
+  networking.tempAddresses = "disabled";
+  networking.dhcpcd.extraConfig = "ipv4only"; # After dhcpcd updates to v10 we can use slaac token, but before that, disable ipv6
 
-  # Enable RA for IPv6 tokens to work
-  services.udev.extraRules = "
-    ACTION==\"add\", SUBSYSTEM==\"net\", RUN+=\"${pkgs.procps}/bin/sysctl net.ipv6.conf.eth0.accept_ra=1\"
-    ACTION==\"add\", SUBSYSTEM==\"net\", RUN+=\"${pkgs.iproute2}/bin/ip token set '::20' dev eth0\"
-    ";
+  # Remove this after dhcpcd v10
+  services.udev.extraRules = ''
+    ACTION=="add", SUBSYSTEM=="net", NAME=="eth0", RUN+="${pkgs.iproute2}/bin/ip token set '::20' dev eth0"
+  '';
 
   system.autoUpgrade = {
     enable = true;
