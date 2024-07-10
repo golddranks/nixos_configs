@@ -35,7 +35,6 @@ in {
   programs.gnupg.agent = {
     enable = true;
     enableSSHSupport = true;
-    pinentryFlavor = "curses";
   };
 
   systemd.services.pull_nix_config = {
