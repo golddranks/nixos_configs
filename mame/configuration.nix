@@ -119,12 +119,7 @@ in {
   networking.interfaces.eno1.useDHCP = true;
   # Disable IPv6 privacy protection because this is a server and we want a static-ish address
   networking.tempAddresses = "disabled";
-  networking.dhcpcd.extraConfig = "ipv4only"; # After dhcpcd updates to v10 we can use slaac token, but before that, disable ipv6
-
-  # Remove this after dhcpcd v10
-  services.udev.extraRules = ''
-    ACTION=="add", SUBSYSTEM=="net", NAME=="eno1", RUN+="${pkgs.iproute}/bin/ip token set '::10' dev eno1"
-  '';
+  networking.dhcpcd.extraConfig = "slaac token ::1";
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users = {
@@ -154,26 +149,7 @@ in {
   # Remember to set `defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool TRUE` on MacOS to speed up samba!
   services.samba = {
     enable = true;
-    securityType = "user";
-    extraConfig = ''
-      max open files = 131072
-      dfree command = ${dfree_script}/bin/dfree"
-      server min protocol = SMB3_00
-      vfs objects = fruit streams_xattr
-      fruit:metadata = stream
-      fruit:veto_appledouble = no
-      fruit:wipe_intentionally_left_blank_rfork = yes
-      fruit:delete_empty_adfiles = yes
-      workgroup = WORKGROUP
-      server string = mame
-      netbios name = mame
-      security = user
-      guest account = nobody
-      map to guest = bad user
-      # These might affect version compatibility?!
-      use sendfile = yes
-    '';
-    shares = let share = p: {
+    settings = let share = p: {
           path = p;
           browseable = "yes";
           "read only" = "no";
@@ -183,6 +159,43 @@ in {
           "force user" = "samba";
           "force group" = "users";
       }; in {
+      global = {
+        # Performance / limits
+        "max open files" = 131072;
+        "dfree command" = "${dfree_script}/bin/dfree";
+        "server multi channel support" = "yes";
+        "aio read size" = 1048576;
+        "aio write size" = 1048576;
+        "socket options" = "TCP_NODELAY IPTOS_LOWDELAY";
+        "use sendfile" = "yes";
+
+        # Protocol
+        "server min protocol" = "SMB3_11";
+        "client min protocol" = "SMB3_11";
+        "smb encrypt" = "desired";
+        "ntlm auth" = "disabled";
+        "lanman auth" = "no";
+
+        # Apple / macOS interoperability
+        "vfs objects" = "fruit streams_xattr";
+        "fruit:model" = "MacSamba";
+        "fruit:metadata" = "stream";
+        "fruit:posix_rename" = "yes";
+        "fruit:zero_file_id" = "yes";
+        "fruit:nfs_aces" = "no";
+        "fruit:veto_appledouble" = "no";
+        "fruit:wipe_intentionally_left_blank_rfork" = "yes";
+        "fruit:delete_empty_adfiles" = "yes";
+
+        # Identity
+        "workgroup" = "WORKGROUP";
+        "server string" = "mame";
+        "netbios name" = "mame";
+
+        # Security / guests
+        "security" = "user";
+        "map to guest" = "never";
+      };
       KonOnePlus = {
         path = "/srv/samba/KonOnePlus";
         browseable = "yes";
@@ -263,11 +276,11 @@ in {
         "=/archive.html".alias = archive;
       };
     };
-    "bitwarden.drasa.eu" = {
-      enableACME = true;
-      forceSSL = true;
-      locations."/".proxyPass = "http://localhost:8080";
-    };
+    #"bitwarden.drasa.eu" = {
+    #  enableACME = true;
+    #  forceSSL = true;
+    #  locations."/".proxyPass = "http://localhost:8080";
+    #};
     "syncthing.drasa.eu" = {
       enableACME = true;
       forceSSL = true;
@@ -323,13 +336,6 @@ in {
   networking.firewall.allowedTCPPorts = [ 445 139 80 443 5357 ];
   networking.firewall.allowedUDPPorts = [ 137 138 3702 ];
 
-  # This value determines the NixOS release from which the default
-  # settings for stateful data, like file locations and database versions
-  # on your system were taken. It‘s perfectly fine and recommended to leave
-  # this value at the release version of the first install of this system.
-  # Before changing this value read the documentation for this option
-  # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-  system.stateVersion = "20.09"; # Did you read the comment?
+  system.stateVersion = "25.11";
 
 }
-
