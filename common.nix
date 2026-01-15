@@ -51,7 +51,7 @@ in {
   environment.systemPackages =
     with pkgs;
     [
-      wget vim pstree tree lsof rsync pciutils ripgrep fd git socat dig tcpdump inetutils
+      wget vim pstree tree lsof rsync pciutils ripgrep fd git socat dig tcpdump inetutils smartmontools
     ];
 
   security.acme.acceptTerms = true;

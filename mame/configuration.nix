@@ -20,6 +20,11 @@ let
     find * -maxdepth 0 -mtime +14 \! -path protected \! -path archive -exec mv {} archive/$year/ \;
     find protected/* -maxdepth 0 -mtime +14 \! -path protected \! -path archive -exec mv {} archive/protected/$year/ \;
   '';
+  unstable = import (fetchTarball {
+    url = "https://github.com/NixOS/nixpkgs/archive/nixos-unstable.tar.gz";
+  }) {
+    system = pkgs.system;
+  };
 in {
   imports =
     [
@@ -110,6 +115,11 @@ in {
     options = [ "bind" "nofail" ];
   };
 
+  fileSystems."/etc/secrets" = {
+    device = "/mnt/Avaruus/@varmuus/mame_state/secrets";
+    options = [ "bind" "nofail" ];
+  };
+
   time.timeZone = "Asia/Tokyo";
 
   # The global useDHCP flag is deprecated, therefore explicitly set to false here.
@@ -119,7 +129,7 @@ in {
   networking.interfaces.eno1.useDHCP = true;
   # Disable IPv6 privacy protection because this is a server and we want a static-ish address
   networking.tempAddresses = "disabled";
-  networking.dhcpcd.extraConfig = "slaac token ::1";
+  networking.dhcpcd.extraConfig = "slaac token ::10";
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users = {
@@ -143,12 +153,10 @@ in {
     AcceptEnv is_vscode
   '';
 
-  # Enable Windows 10 to find the samba shares:
-  services.samba-wsdd.enable = true;
-
   # Remember to set `defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool TRUE` on MacOS to speed up samba!
   services.samba = {
     enable = true;
+    openFirewall = true;
     settings = let share = p: {
           path = p;
           browseable = "yes";
@@ -242,52 +250,65 @@ in {
   };
 
   # NGINX
-  services.nginx.enable = true;
-  services.nginx.virtualHosts = {
-    "mame.drasa.eu" = {
-      enableACME = true;
-      forceSSL = true;
-      default = true;
-      root = "/srv/www/mame.drasa.eu";
-    };
-    "webshare.drasa.eu" = let
-        protected = builtins.toFile "protected.html" "This is a protected folder. A password is required, and the file index is not shown.";
-        archive = builtins.toFile "archive.html" "This is an archive folder. The file index is not shown.";
-      in {
-      root = "/srv/www/webshare.drasa.eu";
-      enableACME = true;
-      forceSSL = true;
-      locations = {
-        "/" = {
-          extraConfig = "autoindex on;";
+  services.nginx = {
+    enable = true;
+    appendHttpConfig = "charset UTF-8;";
+    upstreams.vaultwarden.servers."127.0.0.1:${toString config.services.vaultwarden.config.ROCKET_PORT}" = { };
+    virtualHosts = {
+      "mame.drasa.eu" = {
+        enableACME = true;
+        forceSSL = true;
+        default = true;
+        root = pkgs.writeTextDir "index.html" ''Hello, World! From: まめ'';
+      };
+      "webshare.drasa.eu" = let
+          protected = builtins.toFile "protected.html" "This is a protected folder. A password is required, and the file index is not shown.";
+          archive = builtins.toFile "archive.html" "This is an archive folder. The file index is not shown.";
+        in {
+        root = "/srv/www/webshare.drasa.eu";
+        enableACME = true;
+        forceSSL = true;
+        locations = {
+          "/" = {
+            extraConfig = "autoindex on;";
+          };
+          "/archive/" = {
+            tryFiles = "$uri /archive.html";
+          };
+          "/archive/protected" = {
+            tryFiles = "$uri /protected.html";
+            basicAuthFile = "/var/lib/nginx/secrets/webshare.drasa.eu_protected_password";
+          };
+          "/protected/" = {
+            tryFiles = "$uri /protected.html";
+            basicAuthFile = "/var/lib/nginx/secrets/webshare.drasa.eu_protected_password";
+          };
+          "=/protected.html".alias = protected;
+          "=/archive.html".alias = archive;
         };
-        "/archive/" = {
-          tryFiles = "$uri /archive.html";
+      };
+      "bitwarden.drasa.eu" = {
+        enableACME = true;
+        forceSSL = true;
+        locations = {
+          "/".proxyPass = "http://vaultwarden";
+          "= /notifications/anonymous-hub" = {
+            proxyPass = "http://vaultwarden";
+            proxyWebsockets = true;
+          };
+          "= /notifications/hub" = {
+            proxyPass = "http://vaultwarden";
+            proxyWebsockets = true;
+          };
         };
-        "/archive/protected" = {
-          tryFiles = "$uri /protected.html";
-          basicAuthFile = "/var/lib/nginx/secrets/webshare.drasa.eu_protected_password";
-        };
-        "/protected/" = {
-          tryFiles = "$uri /protected.html";
-          basicAuthFile = "/var/lib/nginx/secrets/webshare.drasa.eu_protected_password";
-        };
-        "=/protected.html".alias = protected;
-        "=/archive.html".alias = archive;
+      };
+      "syncthing.drasa.eu" = {
+        enableACME = true;
+        forceSSL = true;
+        locations."/".proxyPass = "http://vaultwarden";
       };
     };
-    #"bitwarden.drasa.eu" = {
-    #  enableACME = true;
-    #  forceSSL = true;
-    #  locations."/".proxyPass = "http://localhost:8080";
-    #};
-    "syncthing.drasa.eu" = {
-      enableACME = true;
-      forceSSL = true;
-      locations."/".proxyPass = "http://localhost:8384";
-    };
   };
-  services.nginx.appendHttpConfig = "charset UTF-8;";
 
   systemd.services.archive_webshare.script = "${archive_script}/bin/archive.sh";
   systemd.timers.archive_webshare = {
@@ -296,24 +317,30 @@ in {
     timerConfig.Unit = "archive_webshare.service";
   };
 
+  services.smartd.enable = true;
+
+  systemd.services.vaultwarden.unitConfig.RequiresMountsFor = [ "/etc/secrets" ];
   services.vaultwarden = {
     enable = true;
+    package = unstable.vaultwarden;
     backupDir = "/srv/bitwarden-backup";
+    domain = "bitwarden.drasa.eu";
     config = {
-      DOMAIN = "https://bitwarden.drasa.eu";
       SIGNUPS_ALLOWED = true;
       SIGNUPS_VERIFY = true;
       ROCKET_PORT = 8080;
-      ROCKET_LOG = "critical";
       SMTP_HOST = "smtp.eu.mailgun.org";
       SMTP_PORT = 465;
       SMTP_SSL = false;
       SMTP_FROM = "postmaster@bitwarden.drasa.eu";
       SMTP_FROM_NAME = "drasa.eu Bitwarden server";
       SMTP_SECURITY = "force_tls";
-      SMTP_USERNAME = "postmaster@bitwarden.drasa.eu";
+      SMTP_USERNAME = "postmaster@bitwarden.drasa.eu"; # SMTP password is in the env file
+      PUSH_ENABLED = true; # PUSH_INSTALLATION_ID/KEY are in the env file
+      PUSH_RELAY_URI = "https://api.bitwarden.eu";
+      PUSH_IDENTITY_URI = "https://identity.bitwarden.eu";
     };
-    environmentFile = "/var/lib/bitwarden_rs/secrets.env";
+    environmentFile = "/etc/secrets/vaultwarden_secrets.env";
   };
 
   services.syncthing = {
@@ -330,11 +357,13 @@ in {
   services.iperf3.enable = true;
   services.iperf3.openFirewall = true;
 
-  # Open ports in the firewall.
-  # 445, 139, 137, 138: samba, netbios names
-  # 5357, 3702: Web Service Discovery for Windows 10 & Samba
-  networking.firewall.allowedTCPPorts = [ 445 139 80 443 5357 ];
-  networking.firewall.allowedUDPPorts = [ 137 138 3702 ];
+  # Enable Windows 10 to find the samba shares:
+  services.samba-wsdd = {
+    enable = false;
+    openFirewall = true;
+  };
+
+  networking.firewall.allowedTCPPorts = [ 80 443 ];
 
   system.stateVersion = "25.11";
 
