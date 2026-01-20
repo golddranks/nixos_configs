@@ -26,6 +26,7 @@
     uv
     ghostscript
     zstd
+    tree
   ];
 
   networking.hostName = "kage";
