@@ -25,6 +25,7 @@
     texliveFull
     uv
     ghostscript
+    zstd
   ];
 
   networking.hostName = "kage";
@@ -36,7 +37,11 @@
     primaryUser = "kon";
     stateVersion = 5;
     defaults = {
+      CustomUserPreferences = {
+        "com.apple.desktopservices".DSDontWriteNetworkStores = true;
+      };
       finder = {
+        AppleShowAllFiles = true;
         FXPreferredViewStyle = "Nlsv";
         AppleShowAllExtensions = true;
       };
