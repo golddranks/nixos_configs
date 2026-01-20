@@ -16,7 +16,14 @@ in {
     '';
   };
 
-  system.autoUpgrade.enable = true;
+  system.autoUpgrade = {
+    enable = true;
+    channel = "https://channels.nixos.org/nixos-25.11";
+    rebootWindow = {
+      lower = "04:00";
+      upper = "05:00";
+    };
+  };
 
   security.sudo.extraConfig = ''
     Defaults        timestamp_timeout=45
