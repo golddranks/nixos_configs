@@ -120,6 +120,11 @@ in {
     options = [ "bind" "nofail" ];
   };
 
+  fileSystems."/etc/nix_state" = {
+    device = "/mnt/Avaruus/@varmuus/mame_state/nix_state";
+    options = [ "bind" "nofail" ];
+  };
+
   time.timeZone = "Asia/Tokyo";
 
   # The global useDHCP flag is deprecated, therefore explicitly set to false here.
@@ -319,11 +324,14 @@ in {
 
   services.smartd.enable = true;
 
-  systemd.services.vaultwarden.unitConfig.RequiresMountsFor = [ "/etc/secrets" ];
+  systemd.services.vaultwarden.unitConfig.RequiresMountsFor = [
+    "/etc/secrets"
+    "/etc/nix_state"
+  ];
   services.vaultwarden = {
     enable = true;
     package = unstable.vaultwarden;
-    backupDir = "/srv/bitwarden-backup";
+    backupDir = "/etc/nix_state/bitwarden_backup";
     domain = "bitwarden.drasa.eu";
     config = {
       SIGNUPS_ALLOWED = true;
@@ -336,7 +344,8 @@ in {
       SMTP_FROM_NAME = "drasa.eu Bitwarden server";
       SMTP_SECURITY = "force_tls";
       SMTP_USERNAME = "postmaster@bitwarden.drasa.eu"; # SMTP password is in the env file
-      PUSH_ENABLED = true; # PUSH_INSTALLATION_ID/KEY are in the env file
+      PUSH_ENABLED = true; # PUSH_INSTALLATION_KEY is in the env file
+      PUSH_INSTALLATION_ID = "30b8f8e0-81e4-40fc-b381-b3d100211585";
       PUSH_RELAY_URI = "https://api.bitwarden.eu";
       PUSH_IDENTITY_URI = "https://identity.bitwarden.eu";
     };
