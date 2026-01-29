@@ -29,13 +29,11 @@
     tree
   ];
 
-  networking.hostName = "kage";
   nixpkgs.hostPlatform = "aarch64-darwin";
   nix.enable = false;
   security.pam.services.sudo_local.touchIdAuth = true;
 
   system = {
-    primaryUser = "kon";
     stateVersion = 5;
     defaults = {
       CustomUserPreferences = {
