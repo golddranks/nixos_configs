@@ -50,6 +50,7 @@
                 system.configurationRevision = self.rev or self.dirtyRev or null;
                 environment.systemPackages = with pkgs; [
                   claude-code
+                  poetry
                 ];
               }
             )
