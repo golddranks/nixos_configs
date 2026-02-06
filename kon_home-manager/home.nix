@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ pkgs, ... }:
 
 {
   home.username = "kon";
@@ -7,22 +7,12 @@
   programs.home-manager.enable = true;
 
   home.packages = [
-    pkgs.killall
+    pkgs.claude-claude-code
   ];
 
   home.file = {
   };
 
   home.sessionVariables = {
-  };
-
-  systemd.user.services.killall_vscode_node = {
-    Unit.Description = "Kill all CPU hog remote VS Code node processes at night";
-    Service.ExecStart = "/bin/sh -c '/home/kon/.nix-profile/bin/killall node || true'";
-  };
-  systemd.user.timers.killall_vscode_node = {
-    Timer.OnCalendar = "*-*-* 3,4,5:30";
-    Timer.Unit = "killall_vscode_node.service";
-    Install.WantedBy = [ "timers.target" ];
   };
 }

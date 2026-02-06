@@ -14,21 +14,13 @@
     jq
     coreutils
     shellcheck
-    cargo-tarpaulin
-    cargo-fuzz
-    ollama
     tokei
-    audacity
-    ffmpeg
-    deno
-    nodejs
-    texliveFull
     uv
-    ghostscript
     zstd
     tree
   ];
 
+  nixpkgs.config.allowUnfree = true;
   nixpkgs.hostPlatform = "aarch64-darwin";
   nix.enable = false;
   security.pam.services.sudo_local.touchIdAuth = true;
