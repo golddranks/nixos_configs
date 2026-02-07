@@ -18,6 +18,7 @@
     uv
     zstd
     tree
+    pstree
   ];
 
   nixpkgs.config.allowUnfree = true;

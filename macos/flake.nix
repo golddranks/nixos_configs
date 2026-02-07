@@ -34,6 +34,7 @@
                   nodejs
                   texliveFull
                   ghostscript
+                  librsvg
                 ];
               }
             )
