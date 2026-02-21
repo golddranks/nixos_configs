@@ -19,6 +19,8 @@
     zstd
     tree
     pstree
+    rustup
+    nodejs
   ];
 
   nixpkgs.config.allowUnfree = true;
