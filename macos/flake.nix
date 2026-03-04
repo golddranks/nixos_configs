@@ -52,6 +52,7 @@
                 environment.systemPackages = with pkgs; [
                   claude-code
                   poetry
+                  google-cloud-sdk
                 ];
               }
             )
