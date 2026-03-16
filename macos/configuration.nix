@@ -21,6 +21,7 @@
     pstree
     rustup
     nodejs
+    magic-wormhole-rs
   ];
 
   nixpkgs.config.allowUnfree = true;

@@ -53,6 +53,7 @@
                   claude-code
                   poetry
                   google-cloud-sdk
+                  awscli2
                 ];
               }
             )
