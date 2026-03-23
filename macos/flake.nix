@@ -38,6 +38,7 @@
                   ghostscript
                   librsvg
                   claude-code-nix.packages.aarch64-darwin.default
+                  bun
                 ];
               }
             )
