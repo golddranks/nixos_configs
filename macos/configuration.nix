@@ -22,6 +22,7 @@
     rustup
     nodejs
     magic-wormhole-rs
+    gh
   ];
 
   nixpkgs.config.allowUnfree = true;

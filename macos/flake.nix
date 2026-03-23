@@ -5,12 +5,14 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-25.11-darwin";
     nix-darwin.url = "github:nix-darwin/nix-darwin/nix-darwin-25.11";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
+    claude-code-nix.url = "github:sadjow/claude-code-nix";
   };
 
   outputs =
     {
       self,
       nix-darwin,
+      claude-code-nix,
       ...
     }:
     {
@@ -35,6 +37,7 @@
                   texliveFull
                   ghostscript
                   librsvg
+                  claude-code-nix.packages.aarch64-darwin.default
                 ];
               }
             )
@@ -50,10 +53,10 @@
                 system.primaryUser = "um003415";
                 system.configurationRevision = self.rev or self.dirtyRev or null;
                 environment.systemPackages = with pkgs; [
-                  claude-code
                   poetry
                   google-cloud-sdk
                   awscli2
+                  claude-code-nix.packages.aarch64-darwin.default
                 ];
               }
             )
