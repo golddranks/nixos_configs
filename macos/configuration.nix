@@ -23,6 +23,8 @@
     nodejs
     magic-wormhole-rs
     gh
+    cargo-tarpaulin
+    cargo-fuzz
   ];
 
   nixpkgs.config.allowUnfree = true;

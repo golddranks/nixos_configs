@@ -27,8 +27,6 @@
                 system.primaryUser = "kon";
                 system.configurationRevision = self.rev or self.dirtyRev or null;
                 environment.systemPackages = with pkgs; [
-                  cargo-tarpaulin
-                  cargo-fuzz
                   ollama
                   audacity
                   ffmpeg
