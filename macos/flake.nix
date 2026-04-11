@@ -3,6 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-25.11-darwin";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     nix-darwin.url = "github:nix-darwin/nix-darwin/nix-darwin-25.11";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
     claude-code-nix.url = "github:sadjow/claude-code-nix";
@@ -13,6 +14,7 @@
       self,
       nix-darwin,
       claude-code-nix,
+      nixpkgs-unstable,
       ...
     }:
     {
@@ -22,11 +24,20 @@
             ./configuration.nix
             (
               { pkgs, ... }:
+              let
+                unstable = import nixpkgs-unstable {
+                  system = pkgs.system;
+                  config.allowUnfree = true;
+                };
+              in
               {
                 networking.hostName = "kage";
                 system.primaryUser = "kon";
                 system.configurationRevision = self.rev or self.dirtyRev or null;
                 environment.systemPackages = with pkgs; [
+                  unstable.cargo-tarpaulin
+                  unstable.cargo-fuzz
+                  unstable.lima
                   ollama
                   audacity
                   ffmpeg
