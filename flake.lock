@@ -32,10 +32,27 @@
         "type": "github"
       }
     },
+    "pubkeys": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1782144227,
+        "narHash": "sha256-5rBAZFDwARG6XU+pw/WZYG6aQsUD0qX+WZ+HG2KCH5c=",
+        "owner": "golddranks",
+        "repo": "pubkeys",
+        "rev": "1448f160ffcc8391c0242e4658e523b03a73a4c5",
+        "type": "github"
+      },
+      "original": {
+        "owner": "golddranks",
+        "repo": "pubkeys",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "nixos-hardware": "nixos-hardware",
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs",
+        "pubkeys": "pubkeys"
       }
     }
   },

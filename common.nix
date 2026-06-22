@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, pubkeys, ... }:
 let
   pull_nix_config_script = ''
     git -C /home/kon/nixos_configs fetch origin main
@@ -37,6 +37,13 @@ in {
   services.openssh.settings.PasswordAuthentication = false;
   services.openssh.settings.KbdInteractiveAuthentication = false;
   services.openssh.settings.PermitRootLogin = "no";
+
+  # Declarative source of truth for kon's SSH access, pulled from the pubkeys
+  # repo (the `pubkeys` flake input). NixOS still also honors
+  # ~/.ssh/authorized_keys by default (AuthorizedKeysFile includes %h/.ssh/...),
+  # so keys can be bootstrapped before this repo is ever cloned onto a host.
+  users.users.kon.openssh.authorizedKeys.keyFiles = [ "${pubkeys}/authorized_keys_strict" ];
+
   services.fail2ban.enable = true;
 
   programs.gnupg.agent = {

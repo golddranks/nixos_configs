@@ -16,6 +16,7 @@
     shellcheck
     tokei
     uv
+    python314
     zstd
     tree
     pstree
@@ -25,6 +26,7 @@
     gh
     cargo-tarpaulin
     cargo-fuzz
+    dutree
   ];
 
   nixpkgs.config.allowUnfree = true;
