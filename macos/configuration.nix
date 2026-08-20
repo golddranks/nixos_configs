@@ -5,7 +5,7 @@
     vim
     nixd
     nil
-    nixfmt-rfc-style
+    nixfmt
     ripgrep
     ripgrep-all
     nkf
@@ -24,9 +24,21 @@
     nodejs
     magic-wormhole-rs
     gh
-    cargo-tarpaulin
-    cargo-fuzz
     dutree
+    audacity
+    ffmpeg
+    deno
+    texliveFull
+    ghostscript
+    librsvg
+    bun
+    # From the unstable channel (see the overlay in flake.nix).
+    unstable.cargo-tarpaulin
+    unstable.cargo-fuzz
+    unstable.lima
+    unstable.ollama
+    unstable.llama-cpp
+    unstable.claude-code
   ];
 
   nixpkgs.config.allowUnfree = true;
