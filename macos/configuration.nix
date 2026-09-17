@@ -46,15 +46,14 @@
   nix.enable = false;
   security.pam.services.sudo_local.touchIdAuth = true;
 
-  # macOS starts ssh-agent empty at every login (Apple dropped keychain
-  # auto-loading in Sierra). ssh_config's AddKeysToAgent only fires when ssh
-  # itself runs, and git's SSH signing shells out to ssh-keygen -Y sign, which
-  # reads no ssh_config and can only ask the agent — so without this the first
-  # commit of a session dies with "Couldn't find key in agent?".
-  # Redirected rather than StandardErrorPath: that key takes a literal path,
-  # which would collapse every user's log onto one file.
+  # macOS starts ssh-agent empty at every login. git's SSH signing doesn't
+  # respect config's AddKeysToAgent, so load the keychain manually.
   launchd.agents.ssh-add = {
-    command = ''/usr/bin/ssh-add --apple-load-keychain 2>>"$HOME/Library/Logs/ssh-add.log"'';
+    script = ''
+      output=$(/usr/bin/ssh-add --apple-load-keychain 2>&1) && status=0 || status=$?
+      /usr/bin/logger -t org.nixos.ssh-add "Keychain load exited $status: $output"
+      exit "$status"
+    '';
     serviceConfig.RunAtLoad = true;
   };
 
