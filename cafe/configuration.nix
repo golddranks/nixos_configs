@@ -32,7 +32,7 @@ in {
       ../common.nix
     ];
 
-  networking.hostName = "mame";
+  networking.hostName = "cafe";
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -132,9 +132,10 @@ in {
   # replicates the default behaviour.
   networking.useDHCP = false;
   networking.interfaces.eno1.useDHCP = true;
-  # Disable IPv6 privacy protection because this is a server and we want a static-ish address
-  networking.tempAddresses = "disabled";
-  networking.dhcpcd.extraConfig = "slaac token ::10";
+  # mon pins this host with a static DHCPv6 lease (`hostid cafe`), so SLAAC
+  # would only add a second, meaningless identity. RAs are still processed,
+  # for the default route and DNS.
+  networking.dhcpcd.extraConfig = "ipv6ra_noautoconf";
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users = {
@@ -202,8 +203,8 @@ in {
 
         # Identity
         "workgroup" = "WORKGROUP";
-        "server string" = "mame";
-        "netbios name" = "mame";
+        "server string" = "cafe";
+        "netbios name" = "cafe";
 
         # Security / guests
         "security" = "user";
@@ -260,11 +261,11 @@ in {
     appendHttpConfig = "charset UTF-8;";
     upstreams.vaultwarden.servers."127.0.0.1:${toString config.services.vaultwarden.config.ROCKET_PORT}" = { };
     virtualHosts = {
-      "mame.drasa.eu" = {
+      "cafe.drasa.eu" = {
         enableACME = true;
         forceSSL = true;
         default = true;
-        root = pkgs.writeTextDir "index.html" ''Hello, World! From: まめ'';
+        root = pkgs.writeTextDir "index.html" ''Hello, World! From: カフェ'';
       };
       "webshare.drasa.eu" = let
           protected = builtins.toFile "protected.html" "This is a protected folder. A password is required, and the file index is not shown.";

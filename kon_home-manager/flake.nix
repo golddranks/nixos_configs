@@ -21,7 +21,7 @@
       ];
     in {
       homeConfigurations = {
-        "kon@mame" = home-manager.lib.homeManagerConfiguration {
+        "kon@cafe" = home-manager.lib.homeManagerConfiguration {
           inherit modules;
           pkgs = nixpkgs.legacyPackages."x86_64-linux";
         };

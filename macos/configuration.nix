@@ -57,6 +57,9 @@
     serviceConfig.RunAtLoad = true;
   };
 
+  # Leading-space commands must not reach the shared history file
+  programs.zsh.interactiveShellInit = "setopt HIST_IGNORE_SPACE";
+
   system = {
     stateVersion = 5;
     defaults = {

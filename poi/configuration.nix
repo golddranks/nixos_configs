@@ -87,7 +87,7 @@
   #     {
   #       type = "http";
   #       endpoint_name = "Mame HTTP";
-  #       endpoint_url = "https://mame.drasa.eu";
+  #       endpoint_url = "https://cafe.drasa.eu";
   #     }
   #     {
   #       type = "http";
@@ -124,7 +124,7 @@
   #     {
   #       type = "tcp";
   #       endpoint_name = "Mame SSH";
-  #       endpoint_url = "mame.drasa.eu:22";
+  #       endpoint_url = "cafe.drasa.eu:22";
   #     }
   #     {
   #       type = "tcp";

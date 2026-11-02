@@ -6,11 +6,11 @@
   inputs.pubkeys.flake = false;
 
   outputs = { self, nixpkgs, nixos-hardware, pubkeys }: {
-    nixosConfigurations.mame = nixpkgs.lib.nixosSystem {
+    nixosConfigurations.cafe = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       specialArgs = { inherit pubkeys; };
       modules = [
-        ./mame/configuration.nix
+        ./cafe/configuration.nix
       ];
     };
     nixosConfigurations.poi = nixpkgs.lib.nixosSystem {
