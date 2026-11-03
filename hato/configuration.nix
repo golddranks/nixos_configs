@@ -1,13 +1,23 @@
-{ config, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
 {
   imports =
     [
-      /etc/nixos/hardware-configuration.nix
+      ./hardware-configuration.nix
       ../common.nix
     ];
 
   networking.hostName = "hato";
+
+  # Upgrade from this repo's flake (versions pinned by flake.lock) instead of a
+  # channel. common.nix sets a channel, and the two options are mutually exclusive.
+  system.autoUpgrade = {
+    flake = "/home/kon/nixos_configs#hato";
+    channel = lib.mkForce null;
+  };
+
+  # 2 GB RAM, no swap: evaluating the system config can OOM without this.
+  zramSwap.enable = true;
 
   boot.loader.grub.enable = true;
   boot.loader.grub.device = "/dev/sda";
@@ -37,63 +47,14 @@
         forceSSL = true;
         default = true;
         root = "/srv/nginx";
-
-        locations."/.well-known/host-meta" = {
-          proxyPass = "http://unix:/run/mastodon-web/web.socket";
-        };
-
-        locations."/.well-known/webfinger" = {
-          proxyPass = "http://unix:/run/mastodon-web/web.socket";
-          proxyWebsockets = true;
-        };
       };
       "japania.ganba.re" = {
         enableACME = true;
         forceSSL = true;
         root = "/srv/japania.ganba.re";
       };
-      "social.ganba.re" = {
-        root = "${pkgs.mastodon}/public/";
-        forceSSL = true;
-        enableACME = true;
-
-        locations."/system/".alias = "/var/lib/mastodon/public-system/";
-
-        locations."/" = {
-          tryFiles = "$uri @proxy";
-        };
-
-        locations."@proxy" = {
-          proxyPass = "http://unix:/run/mastodon-web/web.socket";
-          proxyWebsockets = true;
-        };
-
-        locations."/api/v1/streaming/" = {
-          proxyPass = "http://unix:/run/mastodon-streaming/streaming.socket";
-          proxyWebsockets = true;
-        };
-      };
     };
   };
-
-  # MASTODON
-  services.mastodon = {
-    enable = true;
-    localDomain = "ganba.re";
-    extraConfig = {
-      WEB_DOMAIN = "social.ganba.re";
-    };
-    smtp = {
-      host = "smtp.mailgun.org";
-      port = 465;
-      fromAddress = "mastodon@ganba.re";
-      authenticate = true;
-      user = "mastodon@ganba.re";
-      passwordFile = "/var/lib/mastodon/secrets/smtp-password";
-    };
-  };
-
-  users.groups.mastodon.members = [ "nginx" ];
 
   # Open ports in the firewall.
   networking.firewall.allowedTCPPorts = [ 80 443 ];
