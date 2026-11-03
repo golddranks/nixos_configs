@@ -1,5 +1,5 @@
 {
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
+  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
   inputs.nixos-hardware.url = "github:NixOS/nixos-hardware/master";
   # SSH authorized keys, single source of truth (not a flake, just key files).
   inputs.pubkeys.url = "github:golddranks/pubkeys";

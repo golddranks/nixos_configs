@@ -14,6 +14,8 @@
   system.autoUpgrade = {
     flake = "/home/kon/nixos_configs#hato";
     channel = lib.mkForce null;
+    # --upgrade only refreshes root's channels, which flake builds don't use.
+    upgrade = false;
   };
 
   # 2 GB RAM, no swap: evaluating the system config can OOM without this.
