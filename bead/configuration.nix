@@ -1,9 +1,9 @@
 { config, lib, pkgs, ... }:
 
 let
-  # The LAN's GUA /64 (mon's /root/recipes/set-lan-prefix moves it). It is in the
-  # /llm/ allow list so that a LAN client which used the public address - or
-  # typed the GUA - still counts as local. Update the two together.
+  # The LAN's GUA /64 (mon's /root/recipes/set-lan-prefix moves it). It is in
+  # llm.drasa.eu's allow list so that a LAN client which resolved the public
+  # name - or typed the GUA - still counts as local. Update the two together.
   lanGua = "2405:1200:54b:4500::/64";
 in
 {
@@ -57,8 +57,8 @@ in
   };
 
   # llama.cpp: the model server, on loopback only. nginx terminates TLS and is
-  # the only way in - https://bead.drasa.eu/llm/ - so the port is never opened
-  # on any LAN-facing address.
+  # the only way in - https://llm.drasa.eu/ - so the port is never opened on any
+  # LAN-facing address.
   services.llama-cpp = {
     enable = true;
     host = "::1";
@@ -80,8 +80,6 @@ in
       "--reasoning" "off"     # it thinks by default; that takes minutes here
       # Qwen's recommended non-thinking sampling; the GGUF doesn't carry it.
       "--temp" "0.7" "--top-p" "0.8" "--top-k" "20" "--min-p" "0" "--presence-penalty" "1.5"
-      # Served under /llm so nginx can hand it one subdirectory of the vhost.
-      "--api-prefix" "/llm"
       "--api-key-file" "/var/lib/llama-cpp/api-key"
     ];
   };
@@ -97,29 +95,35 @@ in
     fi
   '';
 
-  # TLS front-end. `/` is public; `/llm/` answers only sources on the LAN's own
-  # address ranges, which is what makes the key-only LLM a LAN service even
-  # though the vhost is reachable from the internet.
+  # TLS front-ends. `bead.drasa.eu` is public; `llm.drasa.eu` answers only
+  # sources on the LAN's own address ranges, which is what makes the key-only
+  # LLM a LAN service even though the name resolves from the internet.
   services.nginx = {
     enable = true;
-    virtualHosts."bead.drasa.eu" = {
-      enableACME = true;
-      forceSSL = true;
-      default = true;
-      locations."/" = {
-        root = pkgs.writeTextDir "index.html" "Welcome to bead.";
+    virtualHosts = {
+      "bead.drasa.eu" = {
+        enableACME = true;
+        forceSSL = true;
+        default = true;
+        locations."/" = {
+          root = pkgs.writeTextDir "index.html" "Welcome to bead.";
+        };
       };
-      locations."/llm/" = {
-        proxyPass = "http://[::1]:${toString config.services.llama-cpp.port}";
-        extraConfig = ''
-          allow fc00::/7;
-          allow fe80::/10;
-          allow ${lanGua};
-          deny all;
+      "llm.drasa.eu" = {
+        enableACME = true;
+        forceSSL = true;
+        locations."/" = {
+          proxyPass = "http://[::1]:${toString config.services.llama-cpp.port}";
+          extraConfig = ''
+            allow fc00::/7;
+            allow fe80::/10;
+            allow ${lanGua};
+            deny all;
 
-          proxy_buffering off;
-          proxy_read_timeout 3600;
-        '';
+            proxy_buffering off;
+            proxy_read_timeout 3600;
+          '';
+        };
       };
     };
   };
