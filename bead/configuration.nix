@@ -1,5 +1,11 @@
 { config, lib, pkgs, ... }:
 
+let
+  # The LAN's GUA /64 (mon's /root/recipes/set-lan-prefix moves it). It is in the
+  # /llm/ allow list so that a LAN client which used the public address - or
+  # typed the GUA - still counts as local. Update the two together.
+  lanGua = "2405:1200:54b:4500::/64";
+in
 {
   imports =
     [
@@ -50,10 +56,12 @@
     };
   };
 
-  # llama.cpp: web UI and OpenAI-compatible API at http://bead.local:8080
+  # llama.cpp: the model server, on loopback only. nginx terminates TLS and is
+  # the only way in - https://bead.drasa.eu/llm/ - so the port is never opened
+  # on any LAN-facing address.
   services.llama-cpp = {
     enable = true;
-    host = "::"; # dual-stack; the firewall below keeps it LAN-only
+    host = "::1";
     # Qwen3.8 starts at 27B, far too big for a Pi 4. Qwen3.5 is the newest Qwen
     # with small models, and the architecture Qwen3.8 is built on.
     model = pkgs.fetchurl {
@@ -72,18 +80,52 @@
       "--reasoning" "off"     # it thinks by default; that takes minutes here
       # Qwen's recommended non-thinking sampling; the GGUF doesn't carry it.
       "--temp" "0.7" "--top-p" "0.8" "--top-k" "20" "--min-p" "0" "--presence-penalty" "1.5"
+      # Served under /llm so nginx can hand it one subdirectory of the vhost.
+      "--api-prefix" "/llm"
+      "--api-key-file" "/var/lib/llama-cpp/api-key"
     ];
   };
 
-  # LAN only. bead gets global IPv6 addresses, so openFirewall would expose the
-  # port to the internet. Others get a RST rather than a silent drop, so LAN
-  # clients that try the global address first fall back to ULA/IPv4 at once.
-  networking.nftables.enable = true;
-  networking.firewall.extraInputRules = let port = toString config.services.llama-cpp.port; in ''
-    ip saddr { 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 169.254.0.0/16 } tcp dport ${port} accept
-    ip6 saddr { fc00::/7, fe80::/10 } tcp dport ${port} accept
-    tcp dport ${port} reject with tcp reset
+  # The API key is generated on first start; read it back with
+  # `sudo cat /var/lib/llama-cpp/api-key`. Nothing secret lives in this file or
+  # in the nix store - the module's StateDirectory leaves the service's own user
+  # as the only writer.
+  systemd.services.llama-cpp.preStart = ''
+    if [ ! -s /var/lib/llama-cpp/api-key ]; then
+      umask 077
+      ${pkgs.openssl}/bin/openssl rand -hex 32 > /var/lib/llama-cpp/api-key
+    fi
   '';
+
+  # TLS front-end. `/` is public; `/llm/` answers only sources on the LAN's own
+  # address ranges, which is what makes the key-only LLM a LAN service even
+  # though the vhost is reachable from the internet.
+  services.nginx = {
+    enable = true;
+    virtualHosts."bead.drasa.eu" = {
+      enableACME = true;
+      forceSSL = true;
+      default = true;
+      locations."/" = {
+        root = pkgs.writeTextDir "index.html" "Welcome to bead.";
+      };
+      locations."/llm/" = {
+        proxyPass = "http://[::1]:${toString config.services.llama-cpp.port}";
+        extraConfig = ''
+          allow fc00::/7;
+          allow fe80::/10;
+          allow ${lanGua};
+          deny all;
+
+          proxy_buffering off;
+          proxy_read_timeout 3600;
+        '';
+      };
+    };
+  };
+
+  # 80 carries the ACME challenge and the redirect; 443 the vhost itself.
+  networking.firewall.allowedTCPPorts = [ 80 443 ];
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
