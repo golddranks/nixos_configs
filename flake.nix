@@ -5,28 +5,35 @@
   inputs.pubkeys.url = "github:golddranks/pubkeys";
   inputs.pubkeys.flake = false;
 
-  outputs = { self, nixpkgs, nixos-hardware, pubkeys }: {
-    nixosConfigurations.cafe = nixpkgs.lib.nixosSystem {
-      system = "x86_64-linux";
-      specialArgs = { inherit pubkeys; };
-      modules = [
-        ./cafe/configuration.nix
-      ];
+  outputs =
+    {
+      nixpkgs,
+      nixos-hardware,
+      pubkeys,
+      ...
+    }:
+    {
+      nixosConfigurations.cafe = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        specialArgs = { inherit pubkeys; };
+        modules = [
+          ./cafe/configuration.nix
+        ];
+      };
+      nixosConfigurations.bead = nixpkgs.lib.nixosSystem {
+        system = "aarch64-linux";
+        specialArgs = { inherit pubkeys; };
+        modules = [
+          ./bead/configuration.nix
+          nixos-hardware.nixosModules.raspberry-pi-4
+        ];
+      };
+      nixosConfigurations.hato = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        specialArgs = { inherit pubkeys; };
+        modules = [
+          ./hato/configuration.nix
+        ];
+      };
     };
-    nixosConfigurations.poi = nixpkgs.lib.nixosSystem {
-      system = "aarch64-linux";
-      specialArgs = { inherit pubkeys; };
-      modules = [
-        ./poi/configuration.nix
-        nixos-hardware.nixosModules.raspberry-pi-4
-      ];
-    };
-    nixosConfigurations.hato = nixpkgs.lib.nixosSystem {
-      system = "x86_64-linux";
-      specialArgs = { inherit pubkeys; };
-      modules = [
-        ./hato/configuration.nix
-      ];
-    };
-  };
 }

@@ -1,11 +1,10 @@
-{ config, lib, pkgs, ... }:
+{ lib, ... }:
 
 {
-  imports =
-    [
-      ./hardware-configuration.nix
-      ../common.nix
-    ];
+  imports = [
+    ./hardware-configuration.nix
+    ../common.nix
+  ];
 
   networking.hostName = "hato";
 
@@ -35,7 +34,10 @@
     kon = {
       isNormalUser = true;
       description = "Pyry Kontio";
-      extraGroups = [ "wheel" "networkmanager" ];
+      extraGroups = [
+        "wheel"
+        "networkmanager"
+      ];
     };
   };
 
@@ -59,7 +61,10 @@
   };
 
   # Open ports in the firewall.
-  networking.firewall.allowedTCPPorts = [ 80 443 ];
+  networking.firewall.allowedTCPPorts = [
+    80
+    443
+  ];
   # Or disable the firewall altogether.
   # networking.firewall.enable = false;
 
