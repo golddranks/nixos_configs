@@ -28,9 +28,11 @@ in
 
   # Mainline instead of nixos-hardware's linux_rpi4, which isn't in the binary
   # cache. Its ~62 MiB Image needs u-boot >= 2025.07 in /boot/efi (older ones
-  # fit only ~36 MiB). The SSD uses uas, which is a module in this kernel.
+  # fit only ~36 MiB).
   boot.kernelPackages = pkgs.linuxPackages;
-  boot.initrd.availableKernelModules = [ "uas" ];
+  # The SSD's ASMedia bridge (174c:55aa) stalls under sustained I/O with uas on
+  # this kernel, freezing everything that touches the disk. usb-storage is fine.
+  boot.kernelParams = [ "usb-storage.quirks=174c:55aa:u" ];
 
   # The model and a nix evaluation (autoUpgrade) compete for little RAM.
   zramSwap.enable = true;
@@ -62,27 +64,64 @@ in
   services.llama-cpp = {
     enable = true;
     host = "::1";
-    # Qwen3.8 starts at 27B, far too big for a Pi 4. Qwen3.5 is the newest Qwen
-    # with small models, and the architecture Qwen3.8 is built on.
+    # Quality over speed. Measured on this Pi 4: this 4B Q4_K_M (2.7 GB) does
+    # 1.6 tok/s on a short prompt and 2.5 tok/s of prompt processing; the 2B
+    # Q4_K_S (1.2 GB) did 4.0 and 7.2. Generation is memory-bandwidth-bound, so
+    # the weights are what matter.
     model = pkgs.fetchurl {
       url = "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/e87f176479d0855a907a41277aca2f8ee7a09523/Qwen3.5-4B-Q4_K_M.gguf";
       hash = "sha256-AP55hv9fa0Y+YkVYIRRgSdtvkxNgOTinCADR+2nvEaQ=";
     };
-    # The defaults are sized for big GPU boxes. These keep llama-server at
-    # ~3 GiB of this 4 GB Pi's 3.7 GiB usable.
+    # The defaults are sized for big GPU boxes. These put llama-server at
+    # ~3.2 GiB, which leaves the ~300 MiB the rest of bead needs - only because
+    # it is stopped while nixos-upgrade evaluates (see below).
     extraFlags = [
       "--alias" "qwen3.5-4b"
-      "--ctx-size" "4096"     # default: the model's full 262144
+      "--ctx-size" "8192"     # 32 KiB of KV per token for this model
       "--ubatch-size" "256"   # smaller compute buffer; default: 512
       "--parallel" "1"        # default: 4 slots
-      "--ctx-checkpoints" "2" # default: 32 per slot, ~53 MiB each for this model
+      "--ctx-checkpoints" "2" # default: 32 per slot, ~50 MiB each for this model
       "--cache-ram" "0"       # no cross-conversation prompt cache; default: 8 GiB
       "--reasoning" "off"     # it thinks by default; that takes minutes here
       # Qwen's recommended non-thinking sampling; the GGUF doesn't carry it.
       "--temp" "0.7" "--top-p" "0.8" "--top-k" "20" "--min-p" "0" "--presence-penalty" "1.5"
       "--api-key-file" "/var/lib/llama-cpp/api-key"
+      # bead has one job, so the weights are pinned rather than left evictable:
+      # the kernel was already reclaiming them (workingset_refault_file was 56k
+      # against a 3.7 GiB box), and every refault is a read from the USB disk,
+      # where a device reset stalls a forward pass for 30 seconds.
+      "--mlock"
     ];
   };
+
+  # `--mlock` is only as good as this rlimit, and systemd is the only thing that
+  # can raise it: the service runs as a dynamic user with no CAP_IPC_LOCK.
+  systemd.services.llama-cpp.serviceConfig.LimitMEMLOCK = "infinity";
+
+  # Evaluating the system takes ~1 GB, which the pinned model leaves no room
+  # for. postStop runs whether the upgrade succeeds or fails.
+  systemd.services.nixos-upgrade = {
+    preStart = "${pkgs.systemd}/bin/systemctl stop llama-cpp.service";
+    postStop = "${pkgs.systemd}/bin/systemctl start llama-cpp.service";
+  };
+
+  # Ghost runs hourly at :17, so GC must not start near a quarter past: the
+  # 03:15 default collided with the 03:17 run. 02:00 clears it by 17 minutes
+  # and stays well clear of the 04:40 upgrade.
+  nix.gc.dates = "02:00";
+
+  # The nightly garbage collection reads the whole store through the same USB
+  # link, with only ~500 MiB free while the model is pinned. Daily is deliberate
+  # - a predictable rhythm beats one longer weekly outage - so the LLM is
+  # stopped for a minute or two twice a night rather than OOM-killed.
+  systemd.services.nix-gc = {
+    preStart = "${pkgs.systemd}/bin/systemctl stop llama-cpp.service";
+    postStop = "${pkgs.systemd}/bin/systemctl start llama-cpp.service";
+  };
+
+  # ~70 MiB of Python. sshd's own PerSourcePenalties throttles brute force, and
+  # login is key-only.
+  services.fail2ban.enable = lib.mkForce false;
 
   # The API key is generated on first start; read it back with
   # `sudo cat /var/lib/llama-cpp/api-key`. Nothing secret lives in this file or
