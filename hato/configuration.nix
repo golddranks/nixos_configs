@@ -1,4 +1,4 @@
-{ lib, ... }:
+{ lib, pkgs, ... }:
 
 {
   imports = [
@@ -39,6 +39,15 @@
         "networkmanager"
       ];
     };
+    ghost = {
+      isSystemUser = true;
+      group = "nogroup";
+      shell = pkgs.bash;
+      openssh.authorizedKeys.keys = [
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOn+7ho/vMdcej/4Hzuwq9hOamh25pc7rAIBNi+o4RWd ghost@mon"
+      ];
+    };
+
   };
 
   # NGINX
