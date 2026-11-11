@@ -1,0 +1,9 @@
+keys:
+  - &kon_kage age1ry2p0namkzu73t63x5cjjjtg0s8nma7lghc6p386npadplw6agtqpjgz7m # kon@kage
+  - &hato age15f88keg7zs7uk8umez8z26e8fpnalgxnzf02adur8tc6allrv4yqrggrdc
+creation_rules:
+  - path_regex: secrets/hato\.json$
+    key_groups:
+      - age:
+          - *kon_kage
+          - *hato

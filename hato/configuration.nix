@@ -1,5 +1,10 @@
-{ lib, pkgs, ... }:
-
+{
+  secrets,
+  lib,
+  pkgs,
+  globals,
+  ...
+}:
 {
   imports = [
     ./hardware-configuration.nix
@@ -11,7 +16,7 @@
   # Upgrade from this repo's flake (versions pinned by flake.lock) instead of a
   # channel. common.nix sets a channel, and the two options are mutually exclusive.
   system.autoUpgrade = {
-    flake = "/home/kon/nixos_configs#hato";
+    flake = "github:golddranks/nixos_configs/main#hato";
     channel = lib.mkForce null;
     # --upgrade only refreshes root's channels, which flake builds don't use.
     upgrade = false;
@@ -19,6 +24,43 @@
 
   # 2 GB RAM, no swap: evaluating the system config can OOM without this.
   zramSwap.enable = true;
+
+  # Secrets: encrypted in the repo (../secrets/hato.json), decrypted at
+  # activation using hato's own existing SSH host key (no separate key to
+  # manage). Edit with: SOPS_AGE_KEY_FILE=~/.config/sops/age/keys.txt sops
+  # edit secrets/hato.json
+  sops.defaultSopsFile = ../secrets/hato.json;
+  sops.age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
+  sops.secrets.skeletor_lan_vpn_hato_privkey = { };
+  sops.secrets.skeletor_jail_vpn_hato_privkey = { };
+
+  networking.wireguard.interfaces = {
+    wg_skltr_lan = {
+      ips = [ "${globals.skeletor_lan_ula}:1::3/64" ];
+      privateKeyFile = secrets.skeletor_lan_vpn_hato_privkey.path;
+      peers = [
+        {
+          publicKey = "C1/rDqqcbNsValOEMjZJ9RyujDEqMEVQaP08gIhAF24=";
+          endpoint = "vpn.drasa.eu:51820";
+          allowedIPs = [ "${globals.skeletor_lan_ula}::/48" ];
+        }
+      ];
+    };
+    wg_skltr_jail = {
+      ips = [ "10.10.2.3/32" ];
+      privateKeyFile = secrets.skeletor_jail_vpn_hato_privkey.path;
+      peers = [
+        {
+          publicKey = "qWawJ7am19lpsHHaV83EoGSoHSTvFt4E0ENf0gJElTg=";
+          endpoint = "vpn.drasa.eu:51821";
+          allowedIPs = [
+            "8.8.8.8/32"
+            "10.10.1.1/32"
+          ];
+        }
+      ];
+    };
+  };
 
   boot.loader.grub.enable = true;
   boot.loader.grub.device = "/dev/sda";
@@ -60,11 +102,6 @@
         forceSSL = true;
         default = true;
         root = "/srv/nginx";
-      };
-      "japania.ganba.re" = {
-        enableACME = true;
-        forceSSL = true;
-        root = "/srv/japania.ganba.re";
       };
     };
   };

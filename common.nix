@@ -1,11 +1,27 @@
-{ pkgs, pubkeys, ... }:
+{
+  pkgs,
+  pubkeys,
+  config,
+  ...
+}:
 let
   pull_nix_config_script = ''
     git -C /home/kon/nixos_configs fetch origin main
     git -C /home/kon/nixos_configs rebase origin/main main || \
       git -C /home/kon/nixos_configs rebase --abort
   '';
-in {
+in
+{
+  _module.args = {
+    secrets = config.sops.secrets;
+    globals = {
+      # The home LAN's ULA prefix (skeletor is its internal name; mon is the
+      # router). Exposed to every host's module via _module.args, so any host
+      # that imports common.nix can use `skeletor_lan_ula` without extra wiring.
+      skeletor_lan_ula = "fd42:6d6f:6e00";
+    };
+  };
+
   nix = {
     gc = {
       automatic = true;
@@ -52,7 +68,10 @@ in {
   };
 
   systemd.services.pull_nix_config = {
-    path = [ pkgs.git pkgs.openssh ];
+    path = [
+      pkgs.git
+      pkgs.openssh
+    ];
     serviceConfig.User = "kon";
     script = pull_nix_config_script;
   };
@@ -62,11 +81,23 @@ in {
     timerConfig.Unit = "pull_nix_config.service";
   };
 
-  environment.systemPackages =
-    with pkgs;
-    [
-      wget vim pstree tree lsof rsync pciutils ripgrep fd git socat dig tcpdump inetutils smartmontools
-    ];
+  environment.systemPackages = with pkgs; [
+    wget
+    vim
+    pstree
+    tree
+    lsof
+    rsync
+    pciutils
+    ripgrep
+    fd
+    git
+    socat
+    dig
+    tcpdump
+    inetutils
+    smartmontools
+  ];
 
   security.acme.acceptTerms = true;
   security.acme.defaults.email = "pyry.kontio@drasa.eu";
