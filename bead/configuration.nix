@@ -1,17 +1,16 @@
-{ config, lib, pkgs, ... }:
-
-let
-  # The LAN's GUA /64 (mon's /root/recipes/set-lan-prefix moves it). It is in
-  # llm.drasa.eu's allow list so that a LAN client which resolved the public
-  # name - or typed the GUA - still counts as local. Update the two together.
-  lanGua = "2405:1200:54b:4500::/64";
-in
 {
-  imports =
-    [
-      ../common.nix
-      ./hardware-configuration.nix
-    ];
+  config,
+  lib,
+  pkgs,
+  secrets,
+  ...
+}:
+
+{
+  imports = [
+    ../common.nix
+    ./hardware-configuration.nix
+  ];
 
   networking.hostName = "bead";
 
@@ -41,7 +40,10 @@ in
   users.users.kon = {
     isNormalUser = true;
     description = "Pyry Kontio";
-    extraGroups = [ "wheel" "networkmanager" ];
+    extraGroups = [
+      "wheel"
+      "networkmanager"
+    ];
   };
 
   # AVAHI: Publish this server and its address on the network (bead.local)
@@ -57,6 +59,20 @@ in
       sftp = "${pkgs.avahi}/etc/avahi/services/sftp-ssh.service";
     };
   };
+
+  # The API key gating llm.drasa.eu (services.nginx below), encrypted in the
+  # repo (../secrets/bead.json) and decrypted at activation using bead's own
+  # SSH host key. Edit with: SOPS_AGE_KEY_FILE=~/.config/sops/age/keys.txt
+  # sops edit secrets/bead.json
+  sops.defaultSopsFile = ../secrets/bead.json;
+  sops.age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
+  # DynamicUser has no stable uid/gid to own the secret, so it's granted
+  # access via a real, static group instead (see SupplementaryGroups below).
+  sops.secrets.llama_cpp_api_key = {
+    group = "llama-cpp-secrets";
+    mode = "0440";
+  };
+  users.groups.llama-cpp-secrets = { };
 
   # llama.cpp: the model server, on loopback only. nginx terminates TLS and is
   # the only way in - https://llm.drasa.eu/ - so the port is never opened on any
@@ -76,16 +92,33 @@ in
     # ~3.2 GiB, which leaves the ~300 MiB the rest of bead needs - only because
     # it is stopped while nixos-upgrade evaluates (see below).
     extraFlags = [
-      "--alias" "qwen3.5-4b"
-      "--ctx-size" "8192"     # 32 KiB of KV per token for this model
-      "--ubatch-size" "256"   # smaller compute buffer; default: 512
-      "--parallel" "1"        # default: 4 slots
-      "--ctx-checkpoints" "2" # default: 32 per slot, ~50 MiB each for this model
-      "--cache-ram" "0"       # no cross-conversation prompt cache; default: 8 GiB
-      "--reasoning" "off"     # it thinks by default; that takes minutes here
+      "--alias"
+      "qwen3.5-4b"
+      "--ctx-size"
+      "8192" # 32 KiB of KV per token for this model
+      "--ubatch-size"
+      "256" # smaller compute buffer; default: 512
+      "--parallel"
+      "1" # default: 4 slots
+      "--ctx-checkpoints"
+      "2" # default: 32 per slot, ~50 MiB each for this model
+      "--cache-ram"
+      "0" # no cross-conversation prompt cache; default: 8 GiB
+      "--reasoning"
+      "off" # it thinks by default; that takes minutes here
       # Qwen's recommended non-thinking sampling; the GGUF doesn't carry it.
-      "--temp" "0.7" "--top-p" "0.8" "--top-k" "20" "--min-p" "0" "--presence-penalty" "1.5"
-      "--api-key-file" "/var/lib/llama-cpp/api-key"
+      "--temp"
+      "0.7"
+      "--top-p"
+      "0.8"
+      "--top-k"
+      "20"
+      "--min-p"
+      "0"
+      "--presence-penalty"
+      "1.5"
+      "--api-key-file"
+      secrets.llama_cpp_api_key.path
       # bead has one job, so the weights are pinned rather than left evictable:
       # the kernel was already reclaiming them (workingset_refault_file was 56k
       # against a 3.7 GiB box), and every refault is a read from the USB disk,
@@ -94,9 +127,15 @@ in
     ];
   };
 
-  # `--mlock` is only as good as this rlimit, and systemd is the only thing that
-  # can raise it: the service runs as a dynamic user with no CAP_IPC_LOCK.
-  systemd.services.llama-cpp.serviceConfig.LimitMEMLOCK = "infinity";
+  systemd.services.llama-cpp.serviceConfig = {
+    # `--mlock` is only as good as this rlimit, and systemd is the only thing that
+    # can raise it: the service runs as a dynamic user with no CAP_IPC_LOCK.
+    LimitMEMLOCK = "infinity";
+
+    # Grants the dynamic user read access to the sops secret above via its
+    # static group, since DynamicUser has no fixed uid/gid of its own to chown it to.
+    SupplementaryGroups = [ "llama-cpp-secrets" ];
+  };
 
   # Evaluating the system takes ~1 GB, which the pinned model leaves no room
   # for. postStop runs whether the upgrade succeeds or fails.
@@ -123,20 +162,8 @@ in
   # login is key-only.
   services.fail2ban.enable = lib.mkForce false;
 
-  # The API key is generated on first start; read it back with
-  # `sudo cat /var/lib/llama-cpp/api-key`. Nothing secret lives in this file or
-  # in the nix store - the module's StateDirectory leaves the service's own user
-  # as the only writer.
-  systemd.services.llama-cpp.preStart = ''
-    if [ ! -s /var/lib/llama-cpp/api-key ]; then
-      umask 077
-      ${pkgs.openssl}/bin/openssl rand -hex 32 > /var/lib/llama-cpp/api-key
-    fi
-  '';
-
-  # TLS front-ends. `bead.drasa.eu` is public; `llm.drasa.eu` answers only
-  # sources on the LAN's own address ranges, which is what makes the key-only
-  # LLM a LAN service even though the name resolves from the internet.
+  # TLS front-ends. `bead.drasa.eu` is public; `llm.drasa.eu` is open to the
+  # internet too - the API key is the access control, not source address.
   services.nginx = {
     enable = true;
     virtualHosts = {
@@ -154,11 +181,6 @@ in
         locations."/" = {
           proxyPass = "http://[::1]:${toString config.services.llama-cpp.port}";
           extraConfig = ''
-            allow fc00::/7;
-            allow fe80::/10;
-            allow ${lanGua};
-            deny all;
-
             proxy_buffering off;
             proxy_read_timeout 3600;
           '';
@@ -168,7 +190,10 @@ in
   };
 
   # 80 carries the ACME challenge and the redirect; 443 the vhost itself.
-  networking.firewall.allowedTCPPorts = [ 80 443 ];
+  networking.firewall.allowedTCPPorts = [
+    80
+    443
+  ];
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
