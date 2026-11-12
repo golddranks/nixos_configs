@@ -6,3 +6,7 @@
 is whether to also adopt it here so SSH config, shell rc, and per-user
 packages become reproducible. If yes, wire it into the darwin flake; if
 no, leave Mac-side user config out-of-band.
+
+## Cafe's samba setup debugging
+
+## share.drasa.eu work

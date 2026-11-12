@@ -1,11 +1,11 @@
-#!/bin/sh
+#!/bin/bash
 
 booted="$(readlink /run/booted-system/{initrd,kernel,kernel-modules})"
 built="$(readlink /nix/var/nix/profiles/system/{initrd,kernel,kernel-modules})"
 
-printf "System booted with:\n$booted\n"
+printf "System booted with:\n%s\n" "$booted"
 echo
-printf "Current build is:\n$built\n"
+printf "Current build is:\n%s\n" "$built"
 echo
 
 if [ "$booted" != "$built" ]; then
