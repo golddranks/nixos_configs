@@ -24,8 +24,13 @@
   sops.secrets.skeletor_lan_vpn_hato_privkey = { };
   sops.secrets.skeletor_jail_vpn_hato_privkey = { };
 
+  # dynamicEndpointRefreshSeconds: networkd resolves vpn.drasa.eu only once,
+  # when the link comes up - at boot that's before resolved has any DNS
+  # servers, and it never notices the home IP changing. This re-resolves it
+  # 5 min after boot and every 5 min after that.
   networking.wireguard.interfaces = {
     wg_skltr_lan = {
+      dynamicEndpointRefreshSeconds = 300;
       ips = [ "${globals.skeletor_lan_ula}:1::3/64" ];
       privateKeyFile = secrets.skeletor_lan_vpn_hato_privkey.path;
       peers = [
@@ -37,6 +42,7 @@
       ];
     };
     wg_skltr_jail = {
+      dynamicEndpointRefreshSeconds = 300;
       ips = [ "10.10.2.3/32" ];
       privateKeyFile = secrets.skeletor_jail_vpn_hato_privkey.path;
       peers = [
