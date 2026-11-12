@@ -1,0 +1,9 @@
+# Opens a PR when an action in .github/workflows has a new release, bumping
+# both the pinned commit and its version comment. Nothing changes until the
+# PR is merged.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

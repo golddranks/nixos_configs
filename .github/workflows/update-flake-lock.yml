@@ -1,0 +1,42 @@
+# Keeps flake.lock current, so security fixes reach the hosts: their nightly
+# autoUpgrade builds whatever flake.lock on main pins, and never updates it.
+name: Update flake.lock
+
+on:
+  schedule:
+    # 18:00 UTC, ahead of the hosts' 04:40 local upgrade: 03:00 JST on cafe
+    # and bead, 20:00 EET on hato.
+    - cron: "0 18 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    # Actions are pinned by commit, not tag: tags can be moved, and this job
+    # can push to the main branch every host builds from as root.
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: cachix/install-nix-action@3dc140bfc76c49fbd4dd958429132e3746bcb086 # v31.11.5
+
+      - run: nix flake update
+
+      # Evaluating is enough to catch removed or renamed options; nothing is
+      # built here. A failure stops the commit, so the hosts stay on the old
+      # lock.
+      - name: Evaluate every host
+        run: |
+          for host in hato bead cafe; do
+            nix eval --raw ".#nixosConfigurations.$host.config.system.build.toplevel.drvPath"
+            echo
+          done
+
+      - name: Commit and push
+        run: |
+          git diff --quiet flake.lock && exit 0
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "flake.lock: update" flake.lock
+          git push
