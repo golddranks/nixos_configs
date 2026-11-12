@@ -91,18 +91,10 @@ in {
   # unit networkd generates from networking.interfaces.eno1.
   systemd.network.networks."40-eno1".ipv6AcceptRAConfig.Token = "::cafe";
 
-  # Define a user account. Don't forget to set a password with ‘passwd’.
-  users.users = {
-    kon = {
-      isNormalUser = true;
-      description = "Pyry Kontio";
-      extraGroups = [ "wheel" "networkmanager" ];
-    };
-    samba = {
-      description = "Samba";
-      isSystemUser = true;
-      group = "samba";
-    };
+  users.users.samba = {
+    description = "Samba";
+    isSystemUser = true;
+    group = "samba";
   };
 
   users.groups.samba = {};

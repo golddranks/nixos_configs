@@ -71,11 +71,27 @@ in
   services.openssh.settings.KbdInteractiveAuthentication = false;
   services.openssh.settings.PermitRootLogin = "no";
 
-  # Declarative source of truth for kon's SSH access, pulled from the pubkeys
-  # repo (the `pubkeys` flake input). NixOS still also honors
-  # ~/.ssh/authorized_keys by default (AuthorizedKeysFile includes %h/.ssh/...),
-  # so keys can be bootstrapped before this repo is ever cloned onto a host.
-  users.users.kon.openssh.authorizedKeys.keyFiles = [ "${pubkeys}/authorized_keys_strict" ];
+  users.users = {
+    kon = {
+      isNormalUser = true;
+      description = "Pyry Kontio";
+      extraGroups = [ "wheel" ];
+      # Declarative source of truth for kon's SSH access, pulled from the
+      # pubkeys repo (the `pubkeys` flake input). NixOS still also honors
+      # ~/.ssh/authorized_keys by default (AuthorizedKeysFile includes
+      # %h/.ssh/...), so keys can be bootstrapped before this repo is ever
+      # cloned onto a host.
+      openssh.authorizedKeys.keyFiles = [ "${pubkeys}/authorized_keys_strict" ];
+    };
+    ghost = {
+      isSystemUser = true;
+      group = "nogroup";
+      shell = pkgs.bash;
+      openssh.authorizedKeys.keys = [
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOn+7ho/vMdcej/4Hzuwq9hOamh25pc7rAIBNi+o4RWd ghost@mon"
+      ];
+    };
+  };
 
   services.fail2ban.enable = true;
 

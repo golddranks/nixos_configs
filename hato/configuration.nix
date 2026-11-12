@@ -1,6 +1,5 @@
 {
   secrets,
-  pkgs,
   globals,
   ...
 }:
@@ -66,27 +65,6 @@
   # Configure network proxy if necessary
   # networking.proxy.default = "http://user:password@proxy:port/";
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
-
-  # Define a user account. Don't forget to set a password with ‘passwd’.
-  users.users = {
-    kon = {
-      isNormalUser = true;
-      description = "Pyry Kontio";
-      extraGroups = [
-        "wheel"
-        "networkmanager"
-      ];
-    };
-    ghost = {
-      isSystemUser = true;
-      group = "nogroup";
-      shell = pkgs.bash;
-      openssh.authorizedKeys.keys = [
-        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOn+7ho/vMdcej/4Hzuwq9hOamh25pc7rAIBNi+o4RWd ghost@mon"
-      ];
-    };
-
-  };
 
   # NGINX
   services.nginx = {

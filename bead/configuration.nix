@@ -51,14 +51,6 @@
   zramSwap.enable = true;
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
-  users.users.kon = {
-    isNormalUser = true;
-    description = "Pyry Kontio";
-    extraGroups = [
-      "wheel"
-      "networkmanager"
-    ];
-  };
 
   # AVAHI: Publish this server and its address on the network (bead.local)
   services.avahi = {
