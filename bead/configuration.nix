@@ -16,6 +16,11 @@
 
   time.timeZone = "Asia/Tokyo";
 
+  # SLAAC with the same ::bead suffix as its DHCPv6 lease, for the same
+  # redundancy as cafe (see there). bead's ethernet is configured by the
+  # generic catch-all unit, not a per-interface one.
+  systemd.network.networks."99-ethernet-default-dhcp".ipv6AcceptRAConfig.Token = "::bead";
+
   # Mainline instead of nixos-hardware's linux_rpi4, which isn't in the binary
   # cache. Its ~62 MiB Image needs u-boot >= 2025.07 in /boot/efi (older ones
   # fit only ~36 MiB).

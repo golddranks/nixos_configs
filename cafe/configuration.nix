@@ -86,10 +86,10 @@ in {
   # SLAAC re-addresses as soon as a corrected RA arrives, with no lease timer
   # to wait out. The static token keeps the SLAAC-derived address identical
   # to the DHCPv6 one (same ::cafe suffix), so the two paths converge on one
-  # address instead of racing to two different ones, and disabling privacy
-  # addresses keeps that the only SLAAC address on the interface.
-  networking.tempAddresses = "disabled";
-  networking.dhcpcd.extraConfig = "slaac token ::cafe";
+  # address instead of racing to two different ones (common.nix disables
+  # privacy addresses, so it stays the only SLAAC address). 40-eno1 is the
+  # unit networkd generates from networking.interfaces.eno1.
+  systemd.network.networks."40-eno1".ipv6AcceptRAConfig.Token = "::cafe";
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users = {

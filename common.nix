@@ -22,6 +22,14 @@ in
     };
   };
 
+  # systemd-networkd instead of the legacy scripted backend (dhcpcd). Hosts'
+  # networking.interfaces.* and networking.wireguard.interfaces.* translate
+  # automatically, and it brings systemd-resolved along for DHCP/RA-learned DNS.
+  networking.useNetworkd = true;
+  # Servers: no rotating privacy addresses, so outgoing connections come from
+  # a stable, predictable address.
+  networking.tempAddresses = "disabled";
+
   nix = {
     gc = {
       automatic = true;
