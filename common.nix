@@ -32,9 +32,13 @@ in
     '';
   };
 
+  # Builds from this repo on GitHub, so versions are pinned by flake.lock and
+  # the nightly upgrade doesn't depend on the local checkout.
   system.autoUpgrade = {
     enable = true;
-    channel = "https://channels.nixos.org/nixos-25.11";
+    flake = "github:golddranks/nixos_configs/main#${config.networking.hostName}";
+    # --upgrade only refreshes root's channels, which flake builds don't use.
+    upgrade = false;
     rebootWindow = {
       lower = "04:00";
       upper = "05:00";

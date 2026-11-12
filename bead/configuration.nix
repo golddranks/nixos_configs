@@ -16,15 +16,6 @@
 
   time.timeZone = "Asia/Tokyo";
 
-  # Upgrade from this repo's flake (versions pinned by flake.lock) instead of a
-  # channel. common.nix sets a channel, and the two options are mutually exclusive.
-  system.autoUpgrade = {
-    flake = "github:golddranks/nixos_configs/main#bead";
-    channel = lib.mkForce null;
-    # --upgrade only refreshes root's channels, which flake builds don't use.
-    upgrade = false;
-  };
-
   # Mainline instead of nixos-hardware's linux_rpi4, which isn't in the binary
   # cache. Its ~62 MiB Image needs u-boot >= 2025.07 in /boot/efi (older ones
   # fit only ~36 MiB).

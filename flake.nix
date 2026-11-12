@@ -1,5 +1,8 @@
 {
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
+  # cafe's vaultwarden tracks unstable; pinned via flake.lock instead of a
+  # fetchTarball at eval time, so evals are reproducible.
+  inputs.nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
   inputs.nixos-hardware.url = "github:NixOS/nixos-hardware/master";
   # SSH authorized keys, single source of truth (not a flake, just key files).
   inputs.pubkeys.url = "github:golddranks/pubkeys";
@@ -10,6 +13,7 @@
   outputs =
     {
       nixpkgs,
+      nixpkgs-unstable,
       nixos-hardware,
       pubkeys,
       sops-nix,
@@ -20,7 +24,10 @@
         { system, modules }:
         nixpkgs.lib.nixosSystem {
           inherit system;
-          specialArgs = { inherit pubkeys; };
+          specialArgs = {
+            inherit pubkeys;
+            unstablePkgs = nixpkgs-unstable.legacyPackages.${system};
+          };
           modules = modules ++ [ sops-nix.nixosModules.sops ];
         };
     in

@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, unstablePkgs, secrets, ... }:
 let
   dfree_script = pkgs.writeShellScriptBin "dfree" ''
   # The MacOS and Windows SMB clients just check the free space of the root folder, whith doesn't take into account
@@ -13,22 +13,28 @@ let
   fi
 '';
   archive_script = pkgs.writeShellScriptBin "archive.sh" ''
+    set -eu
     year=$(date +%Y)
-    cd "/srv/www/webshare.drasa.eu"
+    cd "/srv/www/share.drasa.eu"
     mkdir -p archive/$year
     mkdir -p archive/protected/$year
-    find * -maxdepth 0 -mtime +14 \! -path protected \! -path archive -exec mv {} archive/$year/ \;
-    find protected/* -maxdepth 0 -mtime +14 \! -path protected \! -path archive -exec mv {} archive/protected/$year/ \;
+    # A glob expands to nothing when the directory is empty, which made
+    # `find protected/*` fail and the timer go red every night; walk the
+    # directories instead. Dotfiles stay put, like they did with the `*` glob.
+    find . -mindepth 1 -maxdepth 1 -mtime +14 \! -name protected \! -name archive \! -name '.*' -exec mv {} archive/$year/ \;
+    if [ -d protected ]; then
+      find protected -mindepth 1 -maxdepth 1 -mtime +14 -exec mv {} archive/protected/$year/ \;
+    fi
   '';
-  unstable = import (fetchTarball {
-    url = "https://github.com/NixOS/nixpkgs/archive/nixos-unstable.tar.gz";
-  }) {
-    system = pkgs.system;
+  bindMount = device: {
+    inherit device;
+    fsType = "auto";
+    options = [ "bind" "nofail" ];
   };
 in {
   imports =
     [
-      /etc/nixos/hardware-configuration.nix
+      ./hardware-configuration.nix
       ../common.nix
     ];
 
@@ -50,80 +56,20 @@ in {
       options = [ "nofail" ];
     };
 
-  fileSystems."/srv/samba/Filesaari/OmatKuvat" = {
-    device = "/mnt/Avaruus/@varmuus/OmatKuvat";
-    options = [ "bind" "nofail" ];
-  };
-
-  fileSystems."/srv/samba/Filesaari/OmatVideot" = {
-    device = "/mnt/Avaruus/@varmuus/OmatVideot";
-    options = [ "bind" "nofail" ];
-  };
-
-  fileSystems."/srv/samba/Filesaari/EditoidutVideot" = {
-    device = "/mnt/Avaruus/@varmuus/EditoidutVideot";
-    options = [ "bind" "nofail" ];
-  };
-
-  fileSystems."/srv/samba/Filesaari/Dokumentit" = {
-    device = "/mnt/Avaruus/@varmuus/Dokumentit";
-    options = [ "bind" "nofail" ];
-  };
-
-  fileSystems."/srv/samba/Filesaari/TutkimusPDF" = {
-    device = "/mnt/Avaruus/@varmuus/TutkimusPDF";
-    options = [ "bind" "nofail" ];
-  };
-
-  fileSystems."/srv/samba/Filesaari/MuutaArvokasta" = {
-    device = "/mnt/Avaruus/@varmuus/MuutaArvokasta";
-    options = [ "bind" "nofail" ];
-  };
-
-  fileSystems."/srv/samba/Filesaari/EiNiinArvokasta" = {
-    device = "/mnt/Valtavuus/EiNiinArvokasta";
-    options = [ "bind" "nofail" ];
-  };
-
-  fileSystems."/srv/samba/Filesaari/Musiikki" = {
-    device = "/mnt/Avaruus/@varmuus/Musiikki";
-    options = [ "bind" "nofail" ];
-  };
-
-  fileSystems."/srv/samba/KonOnePlus" = {
-    device = "/mnt/Avaruus/@varmuus/Syncthing/KonOnePlus";
-    options = [ "bind" "nofail" ];
-  };
-
-  fileSystems."/srv/samba/Filesaari/Anime" = {
-    device = "/mnt/Valtavuus/Video/animu";
-    options = [ "bind" "nofail" ];
-  };
-
-  fileSystems."/srv/samba/Valtavuus" = {
-    device = "/mnt/Valtavuus";
-    options = [ "bind" "nofail" ];
-  };
-
-  fileSystems."/srv/samba/WebShare" = {
-    device = "/mnt/Valtavuus/WebShare";
-    options = [ "bind" "nofail" ];
-  };
-
-  fileSystems."/srv/www/webshare.drasa.eu" = {
-    device = "/mnt/Valtavuus/WebShare";
-    options = [ "bind" "nofail" ];
-  };
-
-  fileSystems."/etc/secrets" = {
-    device = "/mnt/Avaruus/@varmuus/mame_state/secrets";
-    options = [ "bind" "nofail" ];
-  };
-
-  fileSystems."/etc/nix_state" = {
-    device = "/mnt/Avaruus/@varmuus/mame_state/nix_state";
-    options = [ "bind" "nofail" ];
-  };
+  fileSystems."/srv/samba/Filesaari/OmatKuvat" = bindMount "/mnt/Avaruus/@varmuus/OmatKuvat";
+  fileSystems."/srv/samba/Filesaari/OmatVideot" = bindMount "/mnt/Avaruus/@varmuus/OmatVideot";
+  fileSystems."/srv/samba/Filesaari/EditoidutVideot" = bindMount "/mnt/Avaruus/@varmuus/EditoidutVideot";
+  fileSystems."/srv/samba/Filesaari/Dokumentit" = bindMount "/mnt/Avaruus/@varmuus/Dokumentit";
+  fileSystems."/srv/samba/Filesaari/TutkimusPDF" = bindMount "/mnt/Avaruus/@varmuus/TutkimusPDF";
+  fileSystems."/srv/samba/Filesaari/MuutaArvokasta" = bindMount "/mnt/Avaruus/@varmuus/MuutaArvokasta";
+  fileSystems."/srv/samba/Filesaari/EiNiinArvokasta" = bindMount "/mnt/Valtavuus/EiNiinArvokasta";
+  fileSystems."/srv/samba/Filesaari/Musiikki" = bindMount "/mnt/Avaruus/@varmuus/Musiikki";
+  fileSystems."/srv/samba/Filesaari/Anime" = bindMount "/mnt/Valtavuus/Video/animu";
+  fileSystems."/srv/samba/KonOnePlus" = bindMount "/mnt/Avaruus/@varmuus/Syncthing/KonOnePlus";
+  fileSystems."/srv/samba/Valtavuus" = bindMount "/mnt/Valtavuus";
+  fileSystems."/srv/samba/Share" = bindMount "/mnt/Valtavuus/Share";
+  fileSystems."/srv/www/share.drasa.eu" = bindMount "/mnt/Valtavuus/Share";
+  fileSystems."/etc/nix_state" = bindMount "/mnt/Avaruus/@varmuus/mame_state/nix_state";
 
   time.timeZone = "Asia/Tokyo";
 
@@ -132,10 +78,18 @@ in {
   # replicates the default behaviour.
   networking.useDHCP = false;
   networking.interfaces.eno1.useDHCP = true;
-  # mon pins this host with a static DHCPv6 lease (`hostid cafe`), so SLAAC
-  # would only add a second, meaningless identity. RAs are still processed,
-  # for the default route and DNS.
-  networking.dhcpcd.extraConfig = "ipv6ra_noautoconf";
+
+  # SLAAC alongside the static DHCPv6 lease (`hostid cafe`), for redundancy:
+  # if mon reboots, its upstream GUA prefix can take a few seconds to arrive
+  # from the ISP, and a DHCPv6 lease picked up in that window sits on a long
+  # T1 before cafe tries again - tens of minutes of broken connectivity.
+  # SLAAC re-addresses as soon as a corrected RA arrives, with no lease timer
+  # to wait out. The static token keeps the SLAAC-derived address identical
+  # to the DHCPv6 one (same ::cafe suffix), so the two paths converge on one
+  # address instead of racing to two different ones, and disabling privacy
+  # addresses keeps that the only SLAAC address on the interface.
+  networking.tempAddresses = "disabled";
+  networking.dhcpcd.extraConfig = "slaac token ::cafe";
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users = {
@@ -163,36 +117,23 @@ in {
   services.samba = {
     enable = true;
     openFirewall = true;
-    settings = let share = p: {
-          path = p;
-          browseable = "yes";
-          "read only" = "no";
-          "guest ok" = "yes";
-          "create mask" = "0644";
-          "directory mask" = "0755";
-          "force user" = "samba";
-          "force group" = "users";
-      }; in {
+    settings = {
       global = {
-        # Performance / limits
-        "max open files" = 131072;
+        # Global settings
+        "max open files" = 131072; # see samba-smbd.serviceConfig.LimitNOFILE below
         "dfree command" = "${dfree_script}/bin/dfree";
         "server multi channel support" = "yes";
-        "aio read size" = 1048576;
-        "aio write size" = 1048576;
-        "socket options" = "TCP_NODELAY IPTOS_LOWDELAY";
         "use sendfile" = "yes";
-
-        # Protocol
         "server min protocol" = "SMB3_11";
-        "client min protocol" = "SMB3_11";
         "smb encrypt" = "desired";
-        "ntlm auth" = "disabled";
-        "lanman auth" = "no";
+        "workgroup" = "WORKGROUP";
+        "server string" = "cafe";
+        "log level" = "3";
+        "map to guest" = "Bad User";
+        "guest account" = "samba";
 
         # Apple / macOS interoperability
         "vfs objects" = "fruit streams_xattr";
-        "fruit:model" = "MacSamba";
         "fruit:metadata" = "stream";
         "fruit:posix_rename" = "yes";
         "fruit:zero_file_id" = "yes";
@@ -201,29 +142,28 @@ in {
         "fruit:wipe_intentionally_left_blank_rfork" = "yes";
         "fruit:delete_empty_adfiles" = "yes";
 
-        # Identity
-        "workgroup" = "WORKGROUP";
-        "server string" = "cafe";
-        "netbios name" = "cafe";
-
-        # Security / guests
-        "security" = "user";
-        "map to guest" = "never";
-      };
-      KonOnePlus = {
-        path = "/srv/samba/KonOnePlus";
-        browseable = "yes";
-        "read only" = "yes";
-        "guest ok" = "no";
-        "valid users" = "kon";
+        # Share defaults
+        "guest ok" = "yes";
+        "browseable" = "yes";
         "create mask" = "0644";
         "directory mask" = "0755";
-        "force user" = "samba";
-        "force group" = "users";
+        "read only" = "no";
       };
-      Filesaari = share "/srv/samba/Filesaari";
-      Valtavuus = share "/srv/samba/Valtavuus";
-      WebShare = share "/srv/samba/WebShare";
+      KonOnePlus = {
+        "path" = "/srv/samba/KonOnePlus";
+        "read only" = "yes";
+        "valid users" = "kon";
+      };
+      Share = {
+        "path" = "/srv/samba/Share";
+        "guest ok" = "yes";
+      };
+      Filesaari = {
+        "path" = "/srv/samba/Filesaari";
+      };
+      Valtavuus = {
+        "path" = "/srv/samba/Valtavuus";
+      };
     };
   };
 
@@ -255,6 +195,22 @@ in {
     };
   };
 
+  # Encrypted in the repo (../secrets/cafe.json), decrypted at activation using
+  # cafe's own SSH host key. Edit with: SOPS_AGE_KEY_FILE=~/.config/sops/age/keys.txt
+  # sops edit secrets/cafe.json
+  sops.defaultSopsFile = ../secrets/cafe.json;
+  sops.age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
+  sops.secrets.vaultwarden_smtp_password = { };
+  sops.secrets.vaultwarden_push_installation_key = { };
+  # vaultwarden takes these as an env file, rendered at activation. Read by
+  # systemd as root (EnvironmentFile=), so the default root:root 0400 works.
+  sops.templates."vaultwarden.env".content = ''
+    SMTP_PASSWORD=${config.sops.placeholder.vaultwarden_smtp_password}
+    PUSH_INSTALLATION_KEY=${config.sops.placeholder.vaultwarden_push_installation_key}
+  '';
+  # Read by nginx workers on each request, not by the root master process.
+  sops.secrets.share_htpasswd.owner = config.services.nginx.user;
+
   # NGINX
   services.nginx = {
     enable = true;
@@ -267,11 +223,11 @@ in {
         default = true;
         root = pkgs.writeTextDir "index.html" ''Hello, World! From: カフェ'';
       };
-      "webshare.drasa.eu" = let
+      "share.drasa.eu" = let
           protected = builtins.toFile "protected.html" "This is a protected folder. A password is required, and the file index is not shown.";
           archive = builtins.toFile "archive.html" "This is an archive folder. The file index is not shown.";
         in {
-        root = "/srv/www/webshare.drasa.eu";
+        root = "/srv/www/share.drasa.eu";
         enableACME = true;
         forceSSL = true;
         locations = {
@@ -283,11 +239,11 @@ in {
           };
           "/archive/protected" = {
             tryFiles = "$uri /protected.html";
-            basicAuthFile = "/var/lib/nginx/secrets/webshare.drasa.eu_protected_password";
+            basicAuthFile = secrets.share_htpasswd.path;
           };
           "/protected/" = {
             tryFiles = "$uri /protected.html";
-            basicAuthFile = "/var/lib/nginx/secrets/webshare.drasa.eu_protected_password";
+            basicAuthFile = secrets.share_htpasswd.path;
           };
           "=/protected.html".alias = protected;
           "=/archive.html".alias = archive;
@@ -316,22 +272,19 @@ in {
     };
   };
 
-  systemd.services.archive_webshare.script = "${archive_script}/bin/archive.sh";
-  systemd.timers.archive_webshare = {
+  systemd.services.archive_share.script = "${archive_script}/bin/archive.sh";
+  systemd.timers.archive_share = {
     wantedBy = [ "timers.target" ];
     timerConfig.OnCalendar = "*-*-* 3:00";
-    timerConfig.Unit = "archive_webshare.service";
+    timerConfig.Unit = "archive_share.service";
   };
 
   services.smartd.enable = true;
 
-  systemd.services.vaultwarden.unitConfig.RequiresMountsFor = [
-    "/etc/secrets"
-    "/etc/nix_state"
-  ];
+  systemd.services.vaultwarden.unitConfig.RequiresMountsFor = [ "/etc/nix_state" ];
   services.vaultwarden = {
     enable = true;
-    package = unstable.vaultwarden;
+    package = unstablePkgs.vaultwarden;
     backupDir = "/etc/nix_state/bitwarden_backup";
     domain = "bitwarden.drasa.eu";
     config = {
@@ -350,7 +303,7 @@ in {
       PUSH_RELAY_URI = "https://api.bitwarden.eu";
       PUSH_IDENTITY_URI = "https://identity.bitwarden.eu";
     };
-    environmentFile = "/etc/secrets/vaultwarden_secrets.env";
+    environmentFile = config.sops.templates."vaultwarden.env".path;
   };
 
   services.syncthing = {
@@ -359,9 +312,9 @@ in {
     openDefaultPorts = true;
   };
 
-  systemd.services.syncthing.unitConfig = {
-    "RequiresMountsFor" = "/mnt/Avaruus/@varmuus/Syncthing";
-  };
+  systemd.services.syncthing.unitConfig.RequiresMountsFor = [
+    "/mnt/Avaruus/@varmuus/Syncthing"
+  ];
 
   # iperf3 is a network throughput tester
   services.iperf3.enable = true;

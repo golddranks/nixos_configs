@@ -1,6 +1,5 @@
 {
   secrets,
-  lib,
   pkgs,
   globals,
   ...
@@ -12,15 +11,6 @@
   ];
 
   networking.hostName = "hato";
-
-  # Upgrade from this repo's flake (versions pinned by flake.lock) instead of a
-  # channel. common.nix sets a channel, and the two options are mutually exclusive.
-  system.autoUpgrade = {
-    flake = "github:golddranks/nixos_configs/main#hato";
-    channel = lib.mkForce null;
-    # --upgrade only refreshes root's channels, which flake builds don't use.
-    upgrade = false;
-  };
 
   # 2 GB RAM, no swap: evaluating the system config can OOM without this.
   zramSwap.enable = true;
