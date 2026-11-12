@@ -29,6 +29,11 @@ in
   # Servers: no rotating privacy addresses, so outgoing connections come from
   # a stable, predictable address.
   networking.tempAddresses = "disabled";
+  # DHCPv6 client ID derived from the MAC (00:03:00:01:<mac>) instead of
+  # networkd's default, which hashes /etc/machine-id. mon's static leases
+  # (::cafe, ::bead) are keyed on it, and this one survives a reinstall and
+  # can be computed before a host first boots.
+  systemd.network.config.dhcpV6Config.DUIDType = "link-layer";
 
   nix = {
     gc = {
