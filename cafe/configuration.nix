@@ -69,7 +69,7 @@ in {
   fileSystems."/srv/samba/Valtavuus" = bindMount "/mnt/Valtavuus";
   fileSystems."/srv/samba/Share" = bindMount "/mnt/Valtavuus/Share";
   fileSystems."/srv/www/share.drasa.eu" = bindMount "/mnt/Valtavuus/Share";
-  fileSystems."/etc/nix_state" = bindMount "/mnt/Avaruus/@varmuus/mame_state/nix_state";
+  fileSystems."/etc/nix_state" = bindMount "/mnt/Avaruus/@varmuus/cafe_state/nix_state";
 
   time.timeZone = "Asia/Tokyo";
 
@@ -294,10 +294,10 @@ in {
       SMTP_HOST = "smtp.eu.mailgun.org";
       SMTP_PORT = 465;
       SMTP_SSL = false;
-      SMTP_FROM = "postmaster@bitwarden.drasa.eu";
+      SMTP_FROM = "bitwarden@drasa.eu";
       SMTP_FROM_NAME = "drasa.eu Bitwarden server";
       SMTP_SECURITY = "force_tls";
-      SMTP_USERNAME = "postmaster@bitwarden.drasa.eu"; # SMTP password is in the env file
+      SMTP_USERNAME = "bitwarden@drasa.eu"; # SMTP password is in the env file
       PUSH_ENABLED = true; # PUSH_INSTALLATION_KEY is in the env file
       PUSH_INSTALLATION_ID = "30b8f8e0-81e4-40fc-b381-b3d100211585";
       PUSH_RELAY_URI = "https://api.bitwarden.eu";
