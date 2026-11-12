@@ -52,10 +52,6 @@ in
     flake = "github:golddranks/nixos_configs/main#${config.networking.hostName}";
     # --upgrade only refreshes root's channels, which flake builds don't use.
     upgrade = false;
-    rebootWindow = {
-      lower = "04:00";
-      upper = "05:00";
-    };
   };
 
   security.sudo.extraConfig = ''
