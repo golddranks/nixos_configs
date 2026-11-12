@@ -21,13 +21,31 @@
   # generic catch-all unit, not a per-interface one.
   systemd.network.networks."99-ethernet-default-dhcp".ipv6AcceptRAConfig.Token = "::bead";
 
-  # Mainline instead of nixos-hardware's linux_rpi4, which isn't in the binary
-  # cache. Its ~62 MiB Image needs u-boot >= 2025.07 in /boot/efi (older ones
+  # Mainline instead of the Raspberry Pi kernel (linux_rpi4), which isn't in the
+  # binary cache. Its ~62 MiB Image needs u-boot >= 2025.07 in /boot/efi (older ones
   # fit only ~36 MiB).
   boot.kernelPackages = pkgs.linuxPackages;
   # The SSD's ASMedia bridge (174c:55aa) stalls under sustained I/O with uas on
   # this kernel, freezing everything that touches the disk. usb-storage is fine.
   boot.kernelParams = [ "usb-storage.quirks=174c:55aa:u" ];
+
+  # The Pi-specific bits that used to come from nixos-hardware's raspberry-pi-4
+  # module. u-boot (in /boot/efi) reads /boot/extlinux/extlinux.conf.
+  boot.loader = {
+    grub.enable = false;
+    generic-extlinux-compatible.enable = true;
+  };
+  # The SSD hangs off the VL805 USB controller, which sits on PCIe and needs
+  # its firmware loaded via the VideoCore before the root disk appears.
+  boot.initrd.availableKernelModules = [
+    "pcie_brcmstb"
+    "reset-raspberrypi"
+    "usb_storage"
+  ];
+  hardware.deviceTree.filter = "bcm2711-rpi-*.dtb";
+  # 835 MB of linux-firmware, needed here only for the unused wifi and
+  # Bluetooth. hardware-configuration.nix's not-detected.nix defaults it on.
+  hardware.enableRedistributableFirmware = false;
 
   # The model and a nix evaluation (autoUpgrade) compete for little RAM.
   zramSwap.enable = true;
