@@ -46,6 +46,12 @@
   # 835 MB of linux-firmware, needed here only for the unused wifi and
   # Bluetooth. hardware-configuration.nix's not-detected.nix defaults it on.
   hardware.enableRedistributableFirmware = false;
+  # ...so the wifi and Bluetooth drivers only fail and log about it, and wlan0
+  # sits "configuring" in networkd forever. bead is wired-only.
+  boot.blacklistedKernelModules = [
+    "brcmfmac" # wifi; it's also what pulls in cfg80211 and its regulatory.db
+    "hci_uart" # Bluetooth (the Pi's BT chip hangs off a UART)
+  ];
 
   # The model and a nix evaluation (autoUpgrade) compete for little RAM.
   zramSwap.enable = true;
