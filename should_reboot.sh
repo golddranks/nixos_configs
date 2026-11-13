@@ -1,7 +1,11 @@
-#!/bin/bash
+#!/bin/sh
 
-booted="$(readlink /run/booted-system/{initrd,kernel,kernel-modules})"
-built="$(readlink /nix/var/nix/profiles/system/{initrd,kernel,kernel-modules})"
+boot_files() {
+	readlink "$1/initrd" "$1/kernel" "$1/kernel-modules"
+}
+
+booted="$(boot_files /run/booted-system)"
+built="$(boot_files /nix/var/nix/profiles/system)"
 
 printf "System booted with:\n%s\n" "$booted"
 echo

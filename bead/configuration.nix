@@ -14,8 +14,6 @@
 
   networking.hostName = "bead";
 
-  time.timeZone = "Asia/Tokyo";
-
   # SLAAC with the same ::bead suffix as its DHCPv6 lease, for the same
   # redundancy as cafe (see there). bead's ethernet is configured by the
   # generic catch-all unit, not a per-interface one.

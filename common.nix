@@ -58,6 +58,11 @@ in
     Defaults        timestamp_timeout=45
   '';
 
+  # The zone they're used from, not where they are (hato is in Helsinki).
+  # Local-time timers (autoUpgrade, pull_nix_config, nix-gc) then fire at the
+  # same moment on every host, and logs read alike.
+  time.timeZone = "Asia/Tokyo";
+
   i18n.defaultLocale = "en_DK.UTF-8";
   console.font = "Lat2-Terminus16";
   console.keyMap = "us";

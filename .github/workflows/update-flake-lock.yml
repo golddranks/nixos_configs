@@ -6,8 +6,7 @@ name: Update flake.lock
 
 on:
   schedule:
-    # 18:00 UTC, ahead of the hosts' 04:40 local upgrade: 03:00 JST on cafe
-    # and bead, 20:00 EET on hato.
+    # 18:00 UTC = 03:00 JST, ahead of the hosts' 04:40 JST upgrade.
     - cron: "0 18 * * *"
   workflow_dispatch:
 
