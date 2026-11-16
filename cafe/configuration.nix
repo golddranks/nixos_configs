@@ -317,6 +317,10 @@ in
     };
     script = ''
       {
+        if ! ${pkgs.util-linux}/bin/findmnt -n /mnt/Avaruus >/dev/null; then
+          echo "/mnt/Avaruus is not mounted"
+          exit 1
+        fi
         for d in /dev/sd?; do
           printf 'smart %s %s\n' "$d" \
             "$(${pkgs.smartmontools}/bin/smartctl -H "$d" |

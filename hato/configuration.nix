@@ -1,4 +1,5 @@
 {
+  pkgs,
   secrets,
   globals,
   ...
@@ -23,13 +24,18 @@
   sops.secrets.skeletor_lan_vpn_hato_privkey = { };
   sops.secrets.skeletor_jail_vpn_hato_privkey = { };
 
-  # dynamicEndpointRefreshSeconds: networkd resolves vpn.drasa.eu only once,
-  # when the link comes up - at boot that's before resolved has any DNS
-  # servers, and it never notices the home IP changing. This re-resolves it
-  # 5 min after boot and every 5 min after that.
+  # networkd resolves vpn.drasa.eu only once, when the link comes up - at boot
+  # that's before resolved has any DNS servers, and it never notices the home
+  # IP changing. The two interfaces used to each run the built-in
+  # dynamicEndpointRefreshSeconds timer (touch its .netdev, networkctl
+  # reload), both every 5 min from boot. networkctl reload makes a single
+  # D-Bus Reload() call that networkd only runs one at a time; the second of
+  # the two calls got -EBUSY ("Already reloading") and the unit was recorded
+  # as failed. That happened repeatedly (observed many times on 2026-11-16).
+  # wireguard-dynamic-refresh below replaces both with one shared service, so
+  # there's only ever one reload per cycle.
   networking.wireguard.interfaces = {
     wg_skltr_lan = {
-      dynamicEndpointRefreshSeconds = 300;
       ips = [ "${globals.skeletor_lan_ula}:1::3/64" ];
       privateKeyFile = secrets.skeletor_lan_vpn_hato_privkey.path;
       peers = [
@@ -41,7 +47,6 @@
       ];
     };
     wg_skltr_jail = {
-      dynamicEndpointRefreshSeconds = 300;
       ips = [ "10.10.2.3/32" ];
       privateKeyFile = secrets.skeletor_jail_vpn_hato_privkey.path;
       peers = [
@@ -55,6 +60,32 @@
         }
       ];
     };
+  };
+
+  # netdev config must be a real file, not a symlink into the store, so the
+  # refresh service below can touch it (same as the built-in refresh option).
+  environment.etc."systemd/network/40-wg_skltr_lan.netdev".mode = "0444";
+  environment.etc."systemd/network/40-wg_skltr_jail.netdev".mode = "0444";
+
+  systemd.services.wireguard-dynamic-refresh = {
+    description = "Wireguard dynamic endpoint refresh (wg_skltr_lan, wg_skltr_jail)";
+    after = [ "network-online.target" ];
+    wants = [ "network-online.target" ];
+    path = with pkgs; [
+      iproute2
+      systemd
+    ];
+    script = ''
+      touch /etc/systemd/network/40-wg_skltr_lan.netdev \
+            /etc/systemd/network/40-wg_skltr_jail.netdev
+      networkctl reload
+    '';
+  };
+  systemd.timers.wireguard-dynamic-refresh = {
+    partOf = [ "wireguard-dynamic-refresh.service" ];
+    wantedBy = [ "timers.target" ];
+    timerConfig.OnBootSec = 300;
+    timerConfig.OnUnitInactiveSec = 300;
   };
 
   boot.loader.grub.enable = true;
