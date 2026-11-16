@@ -107,6 +107,8 @@ in {
   services.samba = {
     enable = true;
     openFirewall = true;
+    # NetBIOS is IPv4-only and the LAN is IPv6-only; Macs find cafe via avahi.
+    nmbd.enable = false;
     settings = {
       global = {
         # Global settings
@@ -270,6 +272,29 @@ in {
   };
 
   services.smartd.enable = true;
+  # Monthly: reads every block of Avaruus (the only btrfs filesystem) against
+  # its checksums, and repairs bad ones from the other RAID1 copy.
+  services.btrfs.autoScrub.enable = true;
+
+  # What the disks say, written where the probe user can read it: smartctl and
+  # the scrub report need root, and ghost has none.
+  systemd.services.disk-health = {
+    serviceConfig = { Type = "oneshot"; UMask = "0022"; };
+    script = ''
+      {
+        for d in /dev/sd?; do
+          printf 'smart %s %s\n' "$d" \
+            "$(${pkgs.smartmontools}/bin/smartctl -H "$d" |
+               sed -n 's/^SMART overall-health self-assessment test result: //p')"
+        done
+        ${pkgs.btrfs-progs}/bin/btrfs scrub status /mnt/Avaruus 2>&1
+      } > /run/disk-health
+    '';
+  };
+  systemd.timers.disk-health = {
+    wantedBy = [ "timers.target" ];
+    timerConfig = { OnBootSec = "5min"; OnUnitActiveSec = "1h"; };
+  };
 
   systemd.services.vaultwarden.unitConfig.RequiresMountsFor = [ "/etc/nix_state" ];
   services.vaultwarden = {
