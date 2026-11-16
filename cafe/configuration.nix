@@ -1,17 +1,23 @@
-{ config, pkgs, unstablePkgs, secrets, ... }:
+{
+  config,
+  pkgs,
+  unstablePkgs,
+  secrets,
+  ...
+}:
 let
   dfree_script = pkgs.writeShellScriptBin "dfree" ''
-  # The MacOS and Windows SMB clients just check the free space of the root folder, whith doesn't take into account
-  # the free space in the mounted folders inside, so we are manually calculating the free space as the sum of those.
-  if [ "$1" = '.' -a "$(pwd)" = "/srv/samba/Filesaari" ]; then
-    (
-      ${pkgs.coreutils}/bin/df /mnt/Valtavuus | ${pkgs.coreutils}/bin/tail -1 | ${pkgs.gawk}/bin/awk '{print $2" "$4}'
-      ${pkgs.coreutils}/bin/df /mnt/Avaruus | ${pkgs.coreutils}/bin/tail -1 | ${pkgs.gawk}/bin/awk '{print $2" "$4}'
-    ) | ${pkgs.gawk}/bin/awk '{i = i + $1}{j = j + $2} END {printf "%d %d \n", i, j}'
-  else
-    ${pkgs.coreutils}/bin/df "$1" | ${pkgs.coreutils}/bin/tail -1 | ${pkgs.gawk}/bin/awk '{print $2" "$4}'
-  fi
-'';
+    # The MacOS and Windows SMB clients just check the free space of the root folder, whith doesn't take into account
+    # the free space in the mounted folders inside, so we are manually calculating the free space as the sum of those.
+    if [ "$1" = '.' -a "$(pwd)" = "/srv/samba/Filesaari" ]; then
+      (
+        ${pkgs.coreutils}/bin/df /mnt/Valtavuus | ${pkgs.coreutils}/bin/tail -1 | ${pkgs.gawk}/bin/awk '{print $2" "$4}'
+        ${pkgs.coreutils}/bin/df /mnt/Avaruus | ${pkgs.coreutils}/bin/tail -1 | ${pkgs.gawk}/bin/awk '{print $2" "$4}'
+      ) | ${pkgs.gawk}/bin/awk '{i = i + $1}{j = j + $2} END {printf "%d %d \n", i, j}'
+    else
+      ${pkgs.coreutils}/bin/df "$1" | ${pkgs.coreutils}/bin/tail -1 | ${pkgs.gawk}/bin/awk '{print $2" "$4}'
+    fi
+  '';
   archive_script = pkgs.writeShellScriptBin "archive.sh" ''
     set -eu
     year=$(date +%Y)
@@ -29,14 +35,17 @@ let
   bindMount = device: {
     inherit device;
     fsType = "auto";
-    options = [ "bind" "nofail" ];
-  };
-in {
-  imports =
-    [
-      ./hardware-configuration.nix
-      ../common.nix
+    options = [
+      "bind"
+      "nofail"
     ];
+  };
+in
+{
+  imports = [
+    ./hardware-configuration.nix
+    ../common.nix
+  ];
 
   networking.hostName = "cafe";
 
@@ -44,24 +53,44 @@ in {
   boot.loader.efi.canTouchEfiVariables = true;
   boot.loader.systemd-boot.configurationLimit = 30;
 
-  fileSystems."/mnt/Avaruus" =
-    { device = "/dev/disk/by-uuid/3d293e93-b66c-462f-8451-84c2c5f25e7f";
-      fsType = "btrfs";
-      options = [ "nofail" ];
-    };
+  fileSystems."/mnt/Avaruus" = {
+    device = "/dev/disk/by-uuid/3d293e93-b66c-462f-8451-84c2c5f25e7f";
+    fsType = "btrfs";
+    options = [ "nofail" ];
+  };
 
-  fileSystems."/mnt/Valtavuus" =
-    { device = "/dev/disk/by-uuid/a810a776-7a19-4cfe-b406-401554027879";
-      fsType = "ext4";
-      options = [ "nofail" ];
-    };
+  # Works around a race in systemd's 64-btrfs.rules. udev marks a member of a
+  # multi-device btrfs "not ready" until all members are known, and the last
+  # member's event re-triggers the not-ready ones. If two members are handled
+  # in parallel, the re-trigger can miss one whose mark isn't saved yet; it
+  # then stays not ready, and the mount times out (2026-11-16). This repeats
+  # the re-trigger once every boot-time event is done.
+  systemd.services.btrfs-retrigger = {
+    description = "Re-check btrfs devices udev left not ready";
+    wantedBy = [ "sysinit.target" ];
+    after = [ "systemd-udev-trigger.service" ];
+    unitConfig.DefaultDependencies = false;
+    serviceConfig.Type = "oneshot";
+    script = ''
+      udevadm settle
+      udevadm trigger --settle --subsystem-match=block --property-match=ID_BTRFS_READY=0
+    '';
+  };
+
+  fileSystems."/mnt/Valtavuus" = {
+    device = "/dev/disk/by-uuid/a810a776-7a19-4cfe-b406-401554027879";
+    fsType = "ext4";
+    options = [ "nofail" ];
+  };
 
   fileSystems."/srv/samba/Filesaari/OmatKuvat" = bindMount "/mnt/Avaruus/@varmuus/OmatKuvat";
   fileSystems."/srv/samba/Filesaari/OmatVideot" = bindMount "/mnt/Avaruus/@varmuus/OmatVideot";
-  fileSystems."/srv/samba/Filesaari/EditoidutVideot" = bindMount "/mnt/Avaruus/@varmuus/EditoidutVideot";
+  fileSystems."/srv/samba/Filesaari/EditoidutVideot" =
+    bindMount "/mnt/Avaruus/@varmuus/EditoidutVideot";
   fileSystems."/srv/samba/Filesaari/Dokumentit" = bindMount "/mnt/Avaruus/@varmuus/Dokumentit";
   fileSystems."/srv/samba/Filesaari/TutkimusPDF" = bindMount "/mnt/Avaruus/@varmuus/TutkimusPDF";
-  fileSystems."/srv/samba/Filesaari/MuutaArvokasta" = bindMount "/mnt/Avaruus/@varmuus/MuutaArvokasta";
+  fileSystems."/srv/samba/Filesaari/MuutaArvokasta" =
+    bindMount "/mnt/Avaruus/@varmuus/MuutaArvokasta";
   fileSystems."/srv/samba/Filesaari/EiNiinArvokasta" = bindMount "/mnt/Valtavuus/EiNiinArvokasta";
   fileSystems."/srv/samba/Filesaari/Musiikki" = bindMount "/mnt/Avaruus/@varmuus/Musiikki";
   fileSystems."/srv/samba/Filesaari/Anime" = bindMount "/mnt/Valtavuus/Video/animu";
@@ -95,7 +124,7 @@ in {
     group = "samba";
   };
 
-  users.groups.samba = {};
+  users.groups.samba = { };
 
   # To make VS Code (SSH remote) work
   programs.nix-ld.enable = true;
@@ -183,7 +212,7 @@ in {
             <port>445</port>
           </service>
         </service-group>
-     '';
+      '';
     };
   };
 
@@ -207,40 +236,43 @@ in {
   services.nginx = {
     enable = true;
     appendHttpConfig = "charset UTF-8;";
-    upstreams.vaultwarden.servers."127.0.0.1:${toString config.services.vaultwarden.config.ROCKET_PORT}" = { };
+    upstreams.vaultwarden.servers."127.0.0.1:${toString config.services.vaultwarden.config.ROCKET_PORT}" =
+      { };
     virtualHosts = {
       "cafe.drasa.eu" = {
         enableACME = true;
         forceSSL = true;
         default = true;
-        root = pkgs.writeTextDir "index.html" ''Hello, World! From: カフェ'';
+        root = pkgs.writeTextDir "index.html" "Hello, World! From: カフェ";
       };
-      "share.drasa.eu" = let
+      "share.drasa.eu" =
+        let
           protected = builtins.toFile "protected.html" "This is a protected folder. A password is required, and the file index is not shown.";
           archive = builtins.toFile "archive.html" "This is an archive folder. The file index is not shown.";
-        in {
-        root = "/srv/www/share.drasa.eu";
-        enableACME = true;
-        forceSSL = true;
-        locations = {
-          "/" = {
-            extraConfig = "autoindex on;";
+        in
+        {
+          root = "/srv/www/share.drasa.eu";
+          enableACME = true;
+          forceSSL = true;
+          locations = {
+            "/" = {
+              extraConfig = "autoindex on;";
+            };
+            "/archive/" = {
+              tryFiles = "$uri /archive.html";
+            };
+            "/archive/protected" = {
+              tryFiles = "$uri /protected.html";
+              basicAuthFile = secrets.share_htpasswd.path;
+            };
+            "/protected/" = {
+              tryFiles = "$uri /protected.html";
+              basicAuthFile = secrets.share_htpasswd.path;
+            };
+            "=/protected.html".alias = protected;
+            "=/archive.html".alias = archive;
           };
-          "/archive/" = {
-            tryFiles = "$uri /archive.html";
-          };
-          "/archive/protected" = {
-            tryFiles = "$uri /protected.html";
-            basicAuthFile = secrets.share_htpasswd.path;
-          };
-          "/protected/" = {
-            tryFiles = "$uri /protected.html";
-            basicAuthFile = secrets.share_htpasswd.path;
-          };
-          "=/protected.html".alias = protected;
-          "=/archive.html".alias = archive;
         };
-      };
       "bitwarden.drasa.eu" = {
         enableACME = true;
         forceSSL = true;
@@ -279,7 +311,10 @@ in {
   # What the disks say, written where the probe user can read it: smartctl and
   # the scrub report need root, and ghost has none.
   systemd.services.disk-health = {
-    serviceConfig = { Type = "oneshot"; UMask = "0022"; };
+    serviceConfig = {
+      Type = "oneshot";
+      UMask = "0022";
+    };
     script = ''
       {
         for d in /dev/sd?; do
@@ -293,7 +328,10 @@ in {
   };
   systemd.timers.disk-health = {
     wantedBy = [ "timers.target" ];
-    timerConfig = { OnBootSec = "5min"; OnUnitActiveSec = "1h"; };
+    timerConfig = {
+      OnBootSec = "5min";
+      OnUnitActiveSec = "1h";
+    };
   };
 
   systemd.services.vaultwarden.unitConfig.RequiresMountsFor = [ "/etc/nix_state" ];
@@ -341,7 +379,10 @@ in {
     openFirewall = true;
   };
 
-  networking.firewall.allowedTCPPorts = [ 80 443 ];
+  networking.firewall.allowedTCPPorts = [
+    80
+    443
+  ];
 
   system.stateVersion = "25.11";
 
