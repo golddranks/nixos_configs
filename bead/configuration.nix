@@ -23,9 +23,25 @@
   # binary cache. Its ~62 MiB Image needs u-boot >= 2025.07 in /boot/efi (older ones
   # fit only ~36 MiB).
   boot.kernelPackages = pkgs.linuxPackages;
-  # The SSD's ASMedia bridge (174c:55aa) stalls under sustained I/O with uas on
-  # this kernel, freezing everything that touches the disk. usb-storage is fine.
-  boot.kernelParams = [ "usb-storage.quirks=174c:55aa:u" ];
+  # The SSD's ASMedia bridge (174c:55aa) passes SCSI UNMAP through as TRIM but
+  # doesn't advertise it, so the kernel leaves discard off and fstrim.timer
+  # silently does nothing. Untrimmed for six years, this DRAM-less SSD stalled
+  # for up to two minutes under sustained writes. The cap keeps each trim under
+  # the bridge's ~2 GiB UNMAP limit; the kernel would otherwise send up to 4 GiB.
+  # The 120 s command timeout (default 30) waits out any stall that remains
+  # instead of aborting and resetting the device.
+  services.udev.extraRules =
+    let
+      ssdSetup = pkgs.writeShellScript "ssd-setup" ''
+        for f in /sys"$1"/device/scsi_disk/*/provisioning_mode; do echo unmap > "$f"; done
+        echo 1073741824 > /sys"$1"/queue/discard_max_bytes
+        echo 120 > /sys"$1"/device/timeout
+      '';
+    in
+    ''
+      ACTION=="add", SUBSYSTEM=="block", KERNEL=="sd*[!0-9]", \
+        ATTRS{idVendor}=="174c", ATTRS{idProduct}=="55aa", RUN+="${ssdSetup} %p"
+    '';
 
   # The Pi-specific bits that used to come from nixos-hardware's raspberry-pi-4
   # module. u-boot (in /boot/efi) reads /boot/extlinux/extlinux.conf.
@@ -34,11 +50,24 @@
     generic-extlinux-compatible.enable = true;
   };
   # The SSD hangs off the VL805 USB controller, which sits on PCIe and needs
-  # its firmware loaded via the VideoCore before the root disk appears.
+  # its firmware loaded via the VideoCore before the root disk appears. Its
+  # bridge is uas-capable, and usb-storage refuses such a device, so without
+  # uas here the boot hangs after "Starting kernel".
   boot.initrd.availableKernelModules = [
     "pcie_brcmstb"
     "reset-raspberrypi"
     "usb_storage"
+    "uas"
+  ];
+  # Warm reboots occasionally fail to re-enable the SSD's USB link ("Cannot
+  # enable. Maybe the USB cable is bad?"), hanging in the initrd's emergency
+  # mode with no way to recover short of a power cycle. 30 s (default: much
+  # longer) is enough once the link is actually up; a boot that doesn't make
+  # it reboots itself instead of waiting for a human.
+  boot.initrd.systemd.settings.Manager.DefaultDeviceTimeoutSec = "30s";
+  boot.initrd.systemd.services.emergency.serviceConfig.ExecStart = [
+    ""
+    "/bin/systemctl reboot --force"
   ];
   hardware.deviceTree.filter = "bcm2711-rpi-*.dtb";
   # 835 MB of linux-firmware, needed here only for the unused wifi and
