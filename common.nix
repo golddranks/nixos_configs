@@ -91,6 +91,10 @@ in
       openssh.authorizedKeys.keys = [
         "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOn+7ho/vMdcej/4Hzuwq9hOamh25pc7rAIBNi+o4RWd ghost@mon"
       ];
+      # A probe logs in every 10 minutes, and each session started and stopped
+      # a user manager. A nixos switch that landed on a shutdown failed with
+      # status 4. Lingering keeps the manager running instead.
+      linger = true;
     };
   };
 
