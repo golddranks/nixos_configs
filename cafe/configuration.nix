@@ -309,25 +309,30 @@ in
   services.btrfs.autoScrub.enable = true;
 
   # What the disks say, written where the probe user can read it: smartctl and
-  # the scrub report need root, and ghost has none.
+  # the scrub report need root, and ghost has none. Written aside and renamed
+  # into place, so the probe never reads a half-written report.
   systemd.services.disk-health = {
     serviceConfig = {
       Type = "oneshot";
       UMask = "0022";
     };
     script = ''
+      status=0
       {
         if ! ${pkgs.util-linux}/bin/findmnt -n /mnt/Avaruus >/dev/null; then
           echo "/mnt/Avaruus is not mounted"
-          exit 1
+          status=1
+        else
+          for d in /dev/sd?; do
+            printf 'smart %s %s\n' "$d" \
+              "$(${pkgs.smartmontools}/bin/smartctl -H "$d" |
+                 sed -n 's/^SMART overall-health self-assessment test result: //p')"
+          done
+          ${pkgs.btrfs-progs}/bin/btrfs scrub status /mnt/Avaruus 2>&1 || status=$?
         fi
-        for d in /dev/sd?; do
-          printf 'smart %s %s\n' "$d" \
-            "$(${pkgs.smartmontools}/bin/smartctl -H "$d" |
-               sed -n 's/^SMART overall-health self-assessment test result: //p')"
-        done
-        ${pkgs.btrfs-progs}/bin/btrfs scrub status /mnt/Avaruus 2>&1
-      } > /run/disk-health
+      } > /run/disk-health.tmp
+      mv /run/disk-health.tmp /run/disk-health
+      exit "$status"
     '';
   };
   systemd.timers.disk-health = {
