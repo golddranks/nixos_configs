@@ -96,7 +96,7 @@
           (now - 7 * 86400 | todate) as $cutoff
           | (map(select(.after == $ran))[0].timestamp // "") as $ran_at
           | any(.[]; .timestamp > $ran_at and .timestamp <= $cutoff)' >/dev/null &&
-        /usr/bin/osascript -e 'display notification "Running nixpkgs predates a channel release over a week old" with title "Run macos/rebuild.sh"'
+        /usr/bin/osascript -e 'display notification "Running nixpkgs predates a channel release over a week old" with title "Run upgrade.sh"'
 
       # A heads-up as soon as a newer release is out, and a warning once this
       # one is past end of life: its channel then stops moving, so the check

@@ -1,7 +1,7 @@
 # Keeps flake.lock current, so security fixes reach the hosts: their
 # autoUpgrade builds whatever flake.lock on main pins, and never updates it.
 # The Mac's separate flake (macos/flake.lock) is updated in the same run; it is
-# applied by hand with macos/rebuild.sh.
+# applied by hand with upgrade.sh.
 name: Update flake.lock
 
 on:

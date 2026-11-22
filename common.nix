@@ -56,7 +56,7 @@ in
     upgrade = false;
   };
   # A run is skipped unless main has moved, or the running system isn't the one
-  # the last upgrade switched to (e.g. after a manual rebuild.sh). An unchanged
+  # the last upgrade switched to (e.g. after rebuild_local.sh). An unchanged
   # hour then costs one git ls-remote, not an evaluation - and on bead, not a
   # llama-cpp restart. Exit 1 skips the unit cleanly; 255 fails it, so an
   # unreachable GitHub still shows up as a failed upgrade. This relies on the
