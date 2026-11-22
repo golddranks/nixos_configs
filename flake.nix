@@ -1,5 +1,8 @@
 {
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
+  # -small passes a smaller test set, so it gets security fixes a day or more
+  # before nixos-26.05 (nginx 1.30.7: 54 min vs 31 h after the commit). Packages
+  # outside that set may not be in the binary cache yet, and get built locally.
+  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05-small";
   # cafe's vaultwarden tracks unstable; pinned via flake.lock instead of a
   # fetchTarball at eval time, so evals are reproducible.
   inputs.nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";

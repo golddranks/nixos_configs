@@ -1,4 +1,4 @@
-# Keeps flake.lock current, so security fixes reach the hosts: their nightly
+# Keeps flake.lock current, so security fixes reach the hosts: their
 # autoUpgrade builds whatever flake.lock on main pins, and never updates it.
 # The Mac's separate flake (macos/flake.lock) is updated in the same run; it is
 # applied by hand with macos/rebuild.sh.
@@ -6,9 +6,11 @@ name: Update flake.lock
 
 on:
   schedule:
-    # 07:40 UTC = 16:40 JST, 12h ahead of the hosts' 04:40 JST upgrade (the
-    # next day): GitHub's scheduled runs lag 4-8h behind their cron time.
-    - cron: "40 7 * * *"
+    # Hourly: -small advances several times a day, and the hosts check for a
+    # new commit hourly. GitHub's scheduled runs lag 4-9h behind their cron time; hourly,
+    # a fix waits out only that lag, not also the next daily run. A run only
+    # commits when a lock actually changed.
+    - cron: "40 * * * *"
   workflow_dispatch:
 
 permissions:

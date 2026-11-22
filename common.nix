@@ -46,12 +46,35 @@ in
   };
 
   # Builds from this repo on GitHub, so versions are pinned by flake.lock and
-  # the nightly upgrade doesn't depend on the local checkout.
+  # the upgrade doesn't depend on the local checkout. Hourly, so a security fix
+  # waits at most that long once it's in flake.lock.
   system.autoUpgrade = {
     enable = true;
+    dates = "*:40";
     flake = "github:golddranks/nixos_configs/main#${config.networking.hostName}";
     # --upgrade only refreshes root's channels, which flake builds don't use.
     upgrade = false;
+  };
+  # A run is skipped unless main has moved, or the running system isn't the one
+  # the last upgrade switched to (e.g. after a manual rebuild.sh). An unchanged
+  # hour then costs one git ls-remote, not an evaluation - and on bead, not a
+  # llama-cpp restart. Exit 1 skips the unit cleanly; 255 fails it, so an
+  # unreachable GitHub still shows up as a failed upgrade. This relies on the
+  # autoUpgrade module passing --refresh, so the build sees the same main.
+  systemd.services.nixos-upgrade.serviceConfig = {
+    StateDirectory = "nixos-upgrade";
+    ExecCondition = pkgs.writeShellScript "nixos-upgrade-changed" ''
+      rev=$(${pkgs.git}/bin/git ls-remote https://github.com/golddranks/nixos_configs refs/heads/main | cut -f1)
+      [ -n "$rev" ] || exit 255
+      echo "$rev" > /var/lib/nixos-upgrade/pending
+      [ "$rev $(readlink /run/current-system)" != "$(cat /var/lib/nixos-upgrade/done 2>/dev/null)" ] || exit 1
+    '';
+    # Only after a successful switch. If a commit lands between the check and
+    # the build, the newer one gets built and the older recorded; the next run
+    # then just goes ahead once more.
+    ExecStartPost = pkgs.writeShellScript "nixos-upgrade-done" ''
+      echo "$(cat /var/lib/nixos-upgrade/pending) $(readlink /run/current-system)" > /var/lib/nixos-upgrade/done
+    '';
   };
 
   security.sudo.extraConfig = ''

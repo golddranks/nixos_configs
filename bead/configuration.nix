@@ -183,15 +183,10 @@
     postStop = "${pkgs.systemd}/bin/systemctl start llama-cpp.service";
   };
 
-  # Ghost runs hourly at :17, so GC must not start near a quarter past: the
-  # 03:15 default collided with the 03:17 run. 02:00 clears it by 17 minutes
-  # and stays well clear of the 04:40 upgrade.
-  nix.gc.dates = "02:00";
-
   # The nightly garbage collection reads the whole store through the same USB
   # link, with only ~500 MiB free while the model is pinned. Daily is deliberate
   # - a predictable rhythm beats one longer weekly outage - so the LLM is
-  # stopped for a minute or two twice a night rather than OOM-killed.
+  # stopped for a minute or two at each GC and upgrade rather than OOM-killed.
   systemd.services.nix-gc = {
     preStart = "${pkgs.systemd}/bin/systemctl stop llama-cpp.service";
     postStop = "${pkgs.systemd}/bin/systemctl start llama-cpp.service";
