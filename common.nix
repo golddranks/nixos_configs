@@ -77,6 +77,26 @@ in
     '';
   };
 
+  # A new kernel only takes effect after a reboot.
+  # The problem with NixOS's built-in autoUpgrade.allowReboot:
+  # outside its window it holds back the whole upgrade, not just the kernel,
+  # which is why auto-reboot is re-implemented here.
+  # The time avoids GC (03:15) and the upgrade (:40).
+  systemd.services.reboot-for-kernel = {
+    serviceConfig.Type = "oneshot";
+    script = ''
+      booted=$(readlink /run/booted-system/{initrd,kernel,kernel-modules})
+      default=$(readlink /nix/var/nix/profiles/system/{initrd,kernel,kernel-modules})
+      [ "$booted" != "$default" ] || exit 0
+      echo "Rebooting: booted kernel differs from the default boot entry's."
+      systemctl reboot
+    '';
+  };
+  systemd.timers.reboot-for-kernel = {
+    wantedBy = [ "timers.target" ];
+    timerConfig.OnCalendar = "05:00";
+  };
+
   security.sudo.extraConfig = ''
     Defaults        timestamp_timeout=45
   '';
