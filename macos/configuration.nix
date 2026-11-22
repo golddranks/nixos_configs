@@ -16,7 +16,7 @@
     shellcheck
     tokei
     uv
-    python314
+    python315
     zstd
     tree
     pstree
@@ -32,6 +32,7 @@
     ghostscript
     librsvg
     bun
+    jujutsu
     # From the unstable channel (see the overlay in flake.nix).
     unstable.cargo-tarpaulin
     unstable.cargo-fuzz
