@@ -33,6 +33,7 @@
     librsvg
     bun
     jujutsu
+    sops
     # From the unstable channel (see the overlay in flake.nix).
     unstable.cargo-tarpaulin
     unstable.cargo-fuzz
