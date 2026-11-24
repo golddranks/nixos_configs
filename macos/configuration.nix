@@ -1,4 +1,8 @@
 { config, pkgs, ... }:
+let
+  # Dvorak-QWERTY-Suomi's input source ID, derived by macOS; see LEARNINGS.md.
+  dvorakSuomi = "eu.drasa.keyboardlayout.dvorak_qwerty_suomi.keylayout.Dvorak–QWERTY⌘Suomi";
+in
 {
   environment.systemPackages = with pkgs; [
     git
@@ -57,6 +61,43 @@
       /usr/bin/logger -t org.nixos.ssh-add "Keychain load exited $status: $output"
       exit "$status"
     '';
+    serviceConfig.RunAtLoad = true;
+  };
+
+  # Copied, as an installer would; whether macOS follows a symlink into the
+  # store here is untested. The store path is the directory because store
+  # names can't hold the bundle's spaces and ⌘.
+  system.activationScripts.postActivation.text = ''
+    src="${./keyboard-layouts}/Dvorak – QWERTY ⌘ Suomi.bundle"
+    dst="/Library/Keyboard Layouts/Dvorak – QWERTY ⌘ Suomi.bundle"
+    if ! diff -rq "$src" "$dst" >/dev/null 2>&1; then
+      rm -rf "$dst"
+      cp -R "$src" "$dst"
+      chmod -R u+w "$dst"
+    fi
+  '';
+
+  # The enabled keyboard layouts and input modes, exhaustively, and the one selected at login.
+  # Runs in the login session (the input source API is per session) and at every login,
+  # so changes made in System Settings don't stick.
+  # Finnish (QWERTY) is for occasional QWERTY users.
+  launchd.user.agents.input-sources = {
+    script =
+      let
+        sources = {
+          enabled = [
+            dvorakSuomi
+            "com.apple.keylayout.Finnish"
+            "com.apple.inputmethod.Kotoeri.RomajiTyping.Japanese" # 日本語
+          ];
+          selected = dvorakSuomi;
+        };
+      in
+      ''
+        output=$(/usr/bin/osascript -l JavaScript ${./input-sources.js} ${pkgs.lib.escapeShellArg (builtins.toJSON sources)} 2>&1) && status=0 || status=$?
+        /usr/bin/logger -t org.nixos.input-sources "exited $status: $output"
+        exit "$status"
+      '';
     serviceConfig.RunAtLoad = true;
   };
 
@@ -141,6 +182,8 @@
     defaults = {
       CustomUserPreferences = {
         "com.apple.desktopservices".DSDontWriteNetworkStores = true;
+        # The layout Apple's Japanese IME reads keys through when typing kana.
+        "com.apple.inputmethod.Kotoeri".JIMPrefRomajiKeyboardLayoutKey = dvorakSuomi;
       };
       finder = {
         AppleShowAllFiles = true;
