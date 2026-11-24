@@ -101,8 +101,7 @@
 
   # The API key gating llm.drasa.eu (services.nginx below), encrypted in the
   # repo (../secrets/bead.json) and decrypted at activation using bead's own
-  # SSH host key. Edit with: SOPS_AGE_KEY_FILE=~/.config/sops/age/keys.txt
-  # sops edit secrets/bead.json
+  # SSH host key. Edit with: sops edit secrets/bead.json
   sops.defaultSopsFile = ../secrets/bead.json;
   sops.age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
   # DynamicUser has no stable uid/gid to own the secret, so it's granted

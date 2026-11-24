@@ -217,8 +217,7 @@ in
   };
 
   # Encrypted in the repo (../secrets/cafe.json), decrypted at activation using
-  # cafe's own SSH host key. Edit with: SOPS_AGE_KEY_FILE=~/.config/sops/age/keys.txt
-  # sops edit secrets/cafe.json
+  # cafe's own SSH host key. Edit with: sops edit secrets/cafe.json
   sops.defaultSopsFile = ../secrets/cafe.json;
   sops.age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
   sops.secrets.vaultwarden_smtp_password = { };

@@ -34,6 +34,7 @@
     bun
     jujutsu
     sops
+    age
     # From the unstable channel (see the overlay in flake.nix).
     unstable.cargo-tarpaulin
     unstable.cargo-fuzz

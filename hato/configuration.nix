@@ -17,8 +17,7 @@
 
   # Secrets: encrypted in the repo (../secrets/hato.json), decrypted at
   # activation using hato's own existing SSH host key (no separate key to
-  # manage). Edit with: SOPS_AGE_KEY_FILE=~/.config/sops/age/keys.txt sops
-  # edit secrets/hato.json
+  # manage). Edit with: sops edit secrets/hato.json
   sops.defaultSopsFile = ../secrets/hato.json;
   sops.age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
   sops.secrets.skeletor_lan_vpn_hato_privkey = { };
